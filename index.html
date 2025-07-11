@@ -788,40 +788,35 @@
         }
 
         async function initializeFirebase() {
-            let finalFirebaseConfig;
-            let isUsingEnvConfig = false;
-            
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                try {
-                    finalFirebaseConfig = JSON.parse(__firebase_config);
-                    isUsingEnvConfig = true;
-                } catch (e) {
-                     console.error("Error parsing __firebase_config:", e);
-                }
-            } 
-            
-            if (!finalFirebaseConfig && typeof userFirebaseConfig !== 'undefined' && Object.keys(userFirebaseConfig).length > 0) {
-                finalFirebaseConfig = userFirebaseConfig;
-            }
+            // ===================================================================================
+            // CẤU HÌNH FIREBASE
+            // ===================================================================================
+            // Thông tin cấu hình Firebase của bạn được nhúng trực tiếp vào đây.
+            const firebaseConfig = {
+              apiKey: "AIzaSyCJcTMUwO-w7V0YsGUKWeaW-zl42Ww7fxo",
+              authDomain: "qlylaodongbdhhp.firebaseapp.com",
+              projectId: "qlylaodongbdhhp",
+              storageBucket: "qlylaodongbdhhp.appspot.com",
+              messagingSenderId: "462439202995",
+              appId: "1:462439202995:web:06bc11042efb9b99d4f0c6"
+            };
+            // ===================================================================================
 
-            if (!finalFirebaseConfig || Object.keys(finalFirebaseConfig).length === 0) {
-                showAlert("Cấu hình Firebase không được cung cấp. Dữ liệu sẽ không được lưu trực tuyến. Vui lòng xem hướng dẫn để biết cách thiết lập.");
+            if (!firebaseConfig.apiKey) {
+                showAlert("Cấu hình Firebase không hợp lệ. Vui lòng kiểm tra lại thông tin cấu hình.");
                 return;
             }
-
+            
             try {
-                const app = initializeApp(finalFirebaseConfig);
+                const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (isUsingEnvConfig && token) {
-                    await signInWithCustomToken(auth, token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Luôn đăng nhập ẩn danh khi chạy trên web
+                await signInAnonymously(auth);
                 
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'hpu-workload-tracker-app';
+                // Sử dụng projectId làm app id để đường dẫn nhất quán
+                const appId = firebaseConfig.projectId || 'hpu-workload-tracker-app';
                 const basePath = `artifacts/${appId}/public/data`;
 
                 departmentsCol = collection(db, `${basePath}/departments`);
