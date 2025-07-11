@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Giờ Lao động B - Đại học Hải Phòng</title>
+    <title>Hệ thống quản lý nhiệm vụ giảng viên - ĐHHP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -74,68 +74,193 @@
             color: #2563eb;
             background-color: #eff6ff;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-blue-800">Hệ thống Quản lý Giờ Lao động B</h1>
-            <p class="text-lg text-gray-600">Trường Đại học Hải Phòng</p>
+    <!-- Login Page -->
+    <div id="login-page">
+        <div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg">
+            <div class="text-center mb-6">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjTnSBGofmGpcMY_uEoXhgAB-FeeLjVslu1A&s" alt="Logo" class="mx-auto h-20 mb-4">
+                <h1 class="text-2xl font-bold text-blue-800">Đăng nhập hệ thống</h1>
+                <p class="text-gray-600">Quản lý nhiệm vụ giảng viên</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="login-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                    <input type="password" id="login-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Đăng nhập</button>
+                </div>
+            </form>
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Chưa có tài khoản? 
+                <a href="#" id="show-register-link" class="font-medium text-blue-600 hover:text-blue-500">Đăng ký ngay</a>
+            </p>
         </div>
 
-        <!-- Filters and Management -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 items-end">
-            <div>
-                <label for="department-select" class="block text-sm font-medium text-gray-700 mb-1">Chọn Khoa:</label>
-                <select id="department-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+        <div id="register-form-container" class="max-w-md mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg hidden">
+             <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-blue-800">Đăng ký tài khoản</h1>
             </div>
-            <div>
-                <label for="year-select" class="block text-sm font-medium text-gray-700 mb-1">Chọn Năm học:</label>
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="register-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                    <input type="password" id="register-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Đăng ký</button>
+                </div>
+            </form>
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Đã có tài khoản? 
+                <a href="#" id="show-login-link" class="font-medium text-blue-600 hover:text-blue-500">Đăng nhập</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App Content -->
+    <div id="app-content" class="hidden">
+        <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-8">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjTnSBGofmGpcMY_uEoXhgAB-FeeLjVslu1A&s" alt="Logo Trường Đại học Hải Phòng" class="h-16 md:h-20">
+                <div class="text-center">
+                    <h1 class="text-xl md:text-3xl font-bold text-blue-800">Hệ thống quản lý nhiệm vụ hoạt động phục vụ cộng đồng và hoạt động chuyên môn khác của giảng viên theo giờ hành chính</h1>
+                    <p class="text-md md:text-lg text-gray-600">Trường Đại học Hải Phòng</p>
+                </div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpzh7trviplRC5G2r75APp6H3wcTnXVixU-Q&s" alt="Logo Khoa Công nghệ Thông tin" class="h-16 md:h-20">
+            </div>
+
+            <!-- User Info and Logout -->
+            <div class="flex justify-between items-center mb-6 border-t border-b py-2">
+                <div>
+                    <span class="text-sm text-gray-600">Xin chào, <strong id="user-email" class="text-blue-700"></strong>!</span>
+                    <span id="user-role-badge" class="ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full"></span>
+                </div>
                 <div class="flex items-center gap-2">
-                    <select id="year-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
-                    <button id="add-year-btn" class="p-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg shadow-sm" title="Thêm năm học mới"><i class="fas fa-plus"></i></button>
+                    <button id="change-password-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg text-sm">
+                        <i class="fas fa-key mr-1"></i>Đổi mật khẩu
+                    </button>
+                    <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-sm">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Đăng xuất
+                    </button>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
-                 <button id="manage-tasks-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    <i class="fas fa-tasks mr-2"></i>Nhiệm vụ
-                </button>
-                 <button id="manage-departments-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    <i class="fas fa-building mr-2"></i>Khoa
-                </button>
-                <button id="manage-lecturers-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    <i class="fas fa-users mr-2"></i>Giảng viên
-                </button>
-                <button id="add-entry-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    <i class="fas fa-plus-circle mr-2"></i>Thêm Giờ
-                </button>
+
+            <!-- Filters and Management -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 items-end">
+                <div>
+                    <label for="department-select" class="block text-sm font-medium text-gray-700 mb-1">Chọn Khoa:</label>
+                    <select id="department-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                </div>
+                <div>
+                    <label for="year-select" class="block text-sm font-medium text-gray-700 mb-1">Chọn Năm học:</label>
+                    <div class="flex items-center gap-2">
+                        <select id="year-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                        <button id="add-year-btn" class="p-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg shadow-sm admin-only" title="Thêm năm học mới"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
+                    <button id="manage-users-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
+                        <i class="fas fa-user-shield mr-2"></i>Người dùng
+                    </button>
+                    <button id="manage-tasks-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
+                        <i class="fas fa-tasks mr-2"></i>Nhiệm vụ
+                    </button>
+                    <button id="manage-departments-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
+                        <i class="fas fa-building mr-2"></i>Khoa
+                    </button>
+                    <button id="manage-lecturers-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
+                        <i class="fas fa-users mr-2"></i>Giảng viên
+                    </button>
+                    <button id="add-entry-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
+                        <i class="fas fa-plus-circle mr-2"></i>Thêm Giờ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content: Lecturers Table -->
+            <div id="main-content">
+                <h2 id="department-title" class="text-2xl font-bold text-gray-800 mb-4">Tổng hợp Giờ Lao động B</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">STT</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Họ và Tên</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Mã Giảng viên</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Tổng Giờ LĐ B (Năm học)</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lecturers-table-body" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Modals -->
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal">
+        <div class="modal-content max-w-md">
+            <span class="close-button" onclick="closeModal('change-password-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Đổi mật khẩu</h3>
+            <form id="change-password-form" class="space-y-4">
+                <div>
+                    <label for="current-password" class="block text-sm font-medium text-gray-700">Mật khẩu hiện tại</label>
+                    <input type="password" id="current-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="new-password" class="block text-sm font-medium text-gray-700">Mật khẩu mới</label>
+                    <input type="password" id="new-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                 <div>
+                    <label for="confirm-new-password" class="block text-sm font-medium text-gray-700">Xác nhận mật khẩu mới</label>
+                    <input type="password" id="confirm-new-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <!-- Main Content: Lecturers Table -->
-        <div id="main-content">
-            <h2 id="department-title" class="text-2xl font-bold text-gray-800 mb-4">Tổng hợp Giờ Lao động B</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                    <thead class="bg-gray-100">
+    <!-- Manage Users Modal -->
+    <div id="manage-users-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('manage-users-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Quản lý Người dùng</h3>
+            <div class="overflow-x-auto max-h-96">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100 sticky top-0">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">STT</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Họ và Tên</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Mã Giảng viên</th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Tổng Giờ LĐ B (Năm học)</th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Hành động</th>
+                            <th class="px-4 py-2 text-left">Email</th>
+                            <th class="px-4 py-2 text-left">Vai trò</th>
+                            <th class="px-4 py-2 text-center">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody id="lecturers-table-body" class="divide-y divide-gray-200"></tbody>
+                    <tbody id="users-list-body"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <!-- Manage Tasks Modal -->
+    <!-- Other Modals... -->
     <div id="manage-tasks-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('manage-tasks-modal')">&times;</span>
@@ -176,8 +301,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Bulk Add Entry Modal -->
     <div id="bulk-add-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('bulk-add-modal')">&times;</span>
@@ -243,8 +366,6 @@
             </form>
         </div>
     </div>
-
-    <!-- Manage Lecturers Modal -->
     <div id="manage-lecturers-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('manage-lecturers-modal')">&times;</span>
@@ -284,8 +405,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Manage Departments Modal -->
     <div id="manage-departments-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('manage-departments-modal')">&times;</span>
@@ -308,8 +427,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Details Modal -->
     <div id="details-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('details-modal')">&times;</span>
@@ -317,8 +434,6 @@
             <div id="details-content" class="max-h-96 overflow-y-auto"></div>
         </div>
     </div>
-
-    <!-- Add Year Modal -->
     <div id="add-year-modal" class="modal">
         <div class="modal-content max-w-md">
             <span class="close-button" onclick="closeModal('add-year-modal')">&times;</span>
@@ -332,8 +447,6 @@
             </form>
         </div>
     </div>
-    
-    <!-- Alert Modal -->
     <div id="alert-modal" class="modal">
         <div class="modal-content max-w-sm">
              <h3 id="alert-title" class="text-lg font-bold mb-4">Thông báo</h3>
@@ -343,8 +456,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Confirm Modal -->
     <div id="confirm-modal" class="modal">
         <div class="modal-content max-w-sm">
             <h3 class="text-lg font-bold mb-4">Xác nhận</h3>
@@ -359,8 +470,32 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, updateDoc, deleteDoc, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
+            updatePassword,
+            reauthenticateWithCredential,
+            EmailAuthProvider,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            onSnapshot, 
+            addDoc, 
+            doc, 
+            setDoc, 
+            getDoc,
+            getDocs,
+            updateDoc, 
+            deleteDoc, 
+            writeBatch, 
+            query, 
+            where 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Default data for seeding
         const DEFAULT_TASKS = [
@@ -381,6 +516,7 @@
 
         // Global state object
         let state = {
+            currentUser: null, // { uid, email, role }
             departments: [],
             lecturers: [],
             entries: [],
@@ -392,8 +528,14 @@
         
         // Firebase variables
         let db, auth;
-        let departmentsCol, lecturersCol, tasksCol, entriesCol, settingsCol;
+        let usersCol, departmentsCol, lecturersCol, tasksCol, entriesCol, settingsCol;
         const SETTINGS_DOC_ID = 'appSettings';
+
+        // UI Elements
+        const loginPage = document.getElementById('login-page');
+        const appContent = document.getElementById('app-content');
+        const loginFormContainer = document.getElementById('login-form').parentElement;
+        const registerFormContainer = document.getElementById('register-form-container');
 
         // --- Custom Alert/Confirm Modal Logic ---
         function showAlert(message, isSuccess = false) {
@@ -405,8 +547,8 @@
                 title.textContent = "Thành công";
                 title.className = "text-lg font-bold mb-4 text-green-600";
             } else {
-                title.textContent = "Thông báo";
-                title.className = "text-lg font-bold mb-4 text-yellow-600";
+                title.textContent = "Lỗi";
+                title.className = "text-lg font-bold mb-4 text-red-600";
             }
 
             modal.style.display = 'block';
@@ -454,6 +596,23 @@
             renderDepartmentsList();
             renderLecturersList();
             renderTasksList();
+        }
+
+        function updateUIForRole() {
+            if (!state.currentUser) return;
+            const isAdmin = state.currentUser.role === 'admin';
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = isAdmin ? 'inline-flex' : 'none';
+            });
+
+            const roleBadge = document.getElementById('user-role-badge');
+            if (isAdmin) {
+                roleBadge.textContent = 'Admin';
+                roleBadge.className = 'ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-green-100 text-green-800';
+            } else {
+                roleBadge.textContent = 'Viewer';
+                roleBadge.className = 'ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800';
+            }
         }
 
         function renderDepartmentSelect() {
@@ -654,6 +813,40 @@
             document.getElementById('task-id').value = '';
         }
 
+        async function renderUsersList() {
+            const listBody = document.getElementById('users-list-body');
+            listBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">Đang tải...</td></tr>';
+            const usersSnapshot = await getDocs(usersCol);
+            listBody.innerHTML = '';
+            if (usersSnapshot.empty) {
+                listBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">Không có người dùng nào.</td></tr>';
+                return;
+            }
+            usersSnapshot.forEach(userDoc => {
+                const userData = userDoc.data();
+                const isCurrentUser = state.currentUser.uid === userDoc.id;
+                const row = document.createElement('tr');
+                row.className = "border-b";
+                row.innerHTML = `
+                    <td class="px-4 py-2">${userData.email}</td>
+                    <td class="px-4 py-2">
+                        <select data-uid="${userDoc.id}" class="role-select p-1 border rounded-md w-full" ${isCurrentUser ? 'disabled' : ''}>
+                            <option value="viewer" ${userData.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+                            <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                        <div class="flex justify-center items-center gap-2">
+                            <button data-uid="${userDoc.id}" class="save-role-btn bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Lưu</button>
+                            <button data-email="${userData.email}" class="reset-password-btn bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Reset Pass</button>
+                            <button data-uid="${userDoc.id}" class="delete-user-btn bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Xóa</button>
+                        </div>
+                    </td>
+                `;
+                listBody.appendChild(row);
+            });
+        }
+
         // --- Global Functions (for inline onclick) ---
         window.openModal = (modalId) => document.getElementById(modalId).style.display = 'block';
         window.closeModal = (modalId) => document.getElementById(modalId).style.display = 'none';
@@ -661,8 +854,6 @@
             if (event.target.classList.contains('modal')) event.target.style.display = "none";
         };
         
-        // [FIXED] Function to switch tabs in the "Add Hour" modal.
-        // It now disables inputs in the hidden tab to prevent validation issues.
         window.switchTab = (tabName) => {
             const predefinedForm = document.getElementById('predefined-task-form');
             const customForm = document.getElementById('custom-task-form');
@@ -701,6 +892,8 @@
                 lecturerEntries.forEach(entry => {
                     const item = document.createElement('li');
                     item.className = 'py-3 flex justify-between items-center';
+                    const deleteButtonHtml = state.currentUser.role === 'admin' ? 
+                        `<button class="text-xs text-red-500 hover:text-red-700 mt-1" onclick="deleteEntry('${entry.id}')">Xóa</button>` : '';
                     item.innerHTML = `
                         <div>
                             <p class="text-sm font-medium text-gray-800">${entry.description}</p>
@@ -708,7 +901,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-md font-bold text-green-600">${entry.hours} giờ</p>
-                            <button class="text-xs text-red-500 hover:text-red-700 mt-1" onclick="deleteEntry('${entry.id}')">Xóa</button>
+                            ${deleteButtonHtml}
                         </div>
                     `;
                     list.appendChild(item);
@@ -775,25 +968,54 @@
             });
         };
 
-        // --- Firebase Initialization and Listeners ---
+        // --- Inactivity Logout Logic ---
+        let inactivityTimer;
+        const activityEvents = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                showAlert('Bạn đã không hoạt động trong 10 phút và sẽ được tự động đăng xuất.');
+                setTimeout(() => {
+                    if (auth.currentUser) {
+                        signOut(auth);
+                    }
+                }, 3000);
+            }, 600000); // 10 minutes in milliseconds
+        }
+
+        function setupInactivityListeners() {
+            activityEvents.forEach(event => {
+                window.addEventListener(event, resetInactivityTimer, true);
+            });
+        }
+
+        function clearInactivityListeners() {
+             activityEvents.forEach(event => {
+                window.removeEventListener(event, resetInactivityTimer, true);
+            });
+            clearTimeout(inactivityTimer);
+        }
+
+        // --- Firebase Initialization and Auth State ---
+        let dataListenersAttached = false;
         function setupOnSnapshotListeners() {
+            if (dataListenersAttached) return; // Prevent attaching multiple listeners
+            dataListenersAttached = true;
             onSnapshot(departmentsCol, (snapshot) => {
                 state.departments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
             });
-
             onSnapshot(lecturersCol, (snapshot) => {
                 state.lecturers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
             });
-            
             onSnapshot(entriesCol, (snapshot) => {
                 state.entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
             });
-
             onSnapshot(tasksCol, (snapshot) => {
-                if (snapshot.empty) {
+                if (snapshot.empty && state.currentUser.role === 'admin') {
                     const batch = writeBatch(db);
                     DEFAULT_TASKS.forEach(task => {
                         const newDocRef = doc(collection(db, tasksCol.path));
@@ -805,11 +1027,10 @@
                 }
                 render();
             });
-
             onSnapshot(doc(settingsCol, SETTINGS_DOC_ID), (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     state.customYears = docSnapshot.data().customYears || [];
-                } else {
+                } else if (state.currentUser.role === 'admin') {
                     setDoc(doc(settingsCol, SETTINGS_DOC_ID), { customYears: [] });
                 }
                 renderYearSelect();
@@ -817,10 +1038,6 @@
         }
 
         async function initializeFirebase() {
-            // ===================================================================================
-            // CẤU HÌNH FIREBASE
-            // ===================================================================================
-            // Thông tin cấu hình Firebase của bạn được nhúng trực tiếp vào đây.
             const firebaseConfig = {
               apiKey: "AIzaSyCJcTMUwO-w7V0YsGUKWeaW-zl42Ww7fxo",
               authDomain: "qlylaodongbdhhp.firebaseapp.com",
@@ -829,32 +1046,66 @@
               messagingSenderId: "462439202995",
               appId: "1:462439202995:web:06bc11042efb9b99d4f0c6"
             };
-            // ===================================================================================
 
-            if (!firebaseConfig.apiKey) {
-                showAlert("Cấu hình Firebase không hợp lệ. Vui lòng kiểm tra lại thông tin cấu hình.");
-                return;
-            }
-            
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                await signInAnonymously(auth);
-                
                 const appId = firebaseConfig.projectId || 'hpu-workload-tracker-app';
                 const basePath = `artifacts/${appId}/public/data`;
-
+                
+                usersCol = collection(db, `${basePath}/users`);
                 departmentsCol = collection(db, `${basePath}/departments`);
                 lecturersCol = collection(db, `${basePath}/lecturers`);
                 tasksCol = collection(db, `${basePath}/tasks`);
                 entriesCol = collection(db, `${basePath}/entries`);
                 settingsCol = collection(db, `${basePath}/settings`);
-                
-                setupOnSnapshotListeners();
 
-            } catch (error) {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        const userDocRef = doc(db, usersCol.path, user.uid);
+                        let userDoc = await getDoc(userDocRef);
+
+                        if (!userDoc.exists()) {
+                            // Check if this is the first user ever
+                            const allUsersSnapshot = await getDocs(usersCol);
+                            const isFirstUser = allUsersSnapshot.empty;
+                            const newUserRole = isFirstUser ? 'admin' : 'viewer';
+
+                            await setDoc(userDocRef, {
+                                email: user.email,
+                                role: newUserRole,
+                                createdAt: new Date()
+                            });
+                            userDoc = await getDoc(userDocRef); // Re-fetch the doc
+                        }
+
+                        state.currentUser = { uid: user.uid, ...userDoc.data() };
+                        document.getElementById('user-email').textContent = state.currentUser.email;
+                        
+                        loginPage.classList.add('hidden');
+                        appContent.classList.remove('hidden');
+
+                        updateUIForRole();
+                        setupOnSnapshotListeners();
+
+                        // Start the inactivity timer
+                        resetInactivityTimer();
+                        setupInactivityListeners();
+                    } else {
+                        state.currentUser = null;
+                        loginPage.classList.remove('hidden');
+                        appContent.classList.add('hidden');
+                        dataListenersAttached = false; // Reset for next login
+
+                        // Stop the inactivity timer
+                        clearInactivityListeners();
+                    }
+                });
+
+            } catch (error)
+            {
                 console.error("Firebase initialization error:", error);
                 showAlert(`Lỗi khởi tạo Firebase: ${error.message}`);
             }
@@ -862,6 +1113,144 @@
 
         // --- Event Handlers ---
         function addEventListeners() {
+            // Auth form switching
+            document.getElementById('show-register-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+            });
+            document.getElementById('show-login-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                registerFormContainer.classList.add('hidden');
+                loginFormContainer.classList.remove('hidden');
+            });
+
+            // Auth actions
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    showAlert(error.message);
+                }
+            });
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    showAlert(error.message);
+                }
+            });
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                signOut(auth);
+            });
+            
+            // Change Password
+            document.getElementById('change-password-btn').addEventListener('click', () => {
+                openModal('change-password-modal');
+            });
+
+            document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                if (newPassword.length < 6) {
+                    showAlert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+                    return;
+                }
+
+                if (newPassword !== confirmNewPassword) {
+                    showAlert('Mật khẩu mới và mật khẩu xác nhận không khớp.');
+                    return;
+                }
+
+                const user = auth.currentUser;
+                if (!user) return;
+
+                try {
+                    // Re-authenticate user before changing password
+                    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+                    await reauthenticateWithCredential(user, credential);
+                    
+                    // If re-authentication is successful, update the password
+                    await updatePassword(user, newPassword);
+                    
+                    showAlert('Đổi mật khẩu thành công!', true);
+                    closeModal('change-password-modal');
+                    e.target.reset();
+
+                } catch (error) {
+                    console.error("Password change error:", error);
+                    if (error.code === 'auth/wrong-password') {
+                        showAlert('Mật khẩu hiện tại không đúng. Vui lòng thử lại.');
+                    } else {
+                        showAlert(`Đã xảy ra lỗi: ${error.message}`);
+                    }
+                }
+            });
+
+            // User Management
+            document.getElementById('manage-users-btn').addEventListener('click', async () => {
+                await renderUsersList();
+                openModal('manage-users-modal');
+            });
+            
+            document.getElementById('users-list-body').addEventListener('click', async (e) => {
+                const target = e.target;
+
+                // Save Role Change
+                if (target.classList.contains('save-role-btn')) {
+                    const uid = target.dataset.uid;
+                    const selectEl = document.querySelector(`.role-select[data-uid="${uid}"]`);
+                    const newRole = selectEl.value;
+                    try {
+                        await updateDoc(doc(usersCol, uid), { role: newRole });
+                        showAlert('Cập nhật vai trò thành công!', true);
+                    } catch (error) {
+                        showAlert(`Lỗi cập nhật vai trò: ${error.message}`);
+                    }
+                }
+
+                // Reset Password
+                if (target.classList.contains('reset-password-btn')) {
+                    const email = target.dataset.email;
+                    showConfirm(`Bạn có chắc muốn gửi email reset mật khẩu cho ${email}?`, async () => {
+                        try {
+                            await sendPasswordResetEmail(auth, email);
+                            showAlert(`Đã gửi email reset mật khẩu tới ${email}.`, true);
+                        } catch (error) {
+                             showAlert(`Lỗi gửi email: ${error.message}`);
+                        }
+                    });
+                }
+
+                // Delete User
+                if (target.classList.contains('delete-user-btn')) {
+                    const uid = target.dataset.uid;
+                    showConfirm('Bạn có chắc muốn xóa người dùng này? Hành động này chỉ xóa thông tin khỏi danh sách, không xóa tài khoản đăng nhập vĩnh viễn.', async () => {
+                        try {
+                            // NOTE: This only deletes the user's record from Firestore.
+                            // To delete the user from Firebase Authentication, you need to use the Firebase Admin SDK in a backend environment (like a Cloud Function).
+                            // This is a security measure of Firebase.
+                            await deleteDoc(doc(usersCol, uid));
+                            showAlert('Đã xóa người dùng khỏi danh sách.', true);
+                            renderUsersList(); // Refresh the list
+                        } catch (error) {
+                            showAlert(`Lỗi xóa người dùng: ${error.message}`);
+                        }
+                    });
+                }
+            });
+
+
+            // Department select
             document.getElementById('department-select').addEventListener('change', (e) => {
                 state.selectedDepartmentId = e.target.value;
                 renderLecturerTable();
@@ -871,6 +1260,7 @@
                 renderLecturerTable();
             });
 
+            // Modal buttons
             document.getElementById('manage-tasks-btn').addEventListener('click', () => openModal('manage-tasks-modal'));
             document.getElementById('manage-lecturers-btn').addEventListener('click', () => openModal('manage-lecturers-modal'));
             document.getElementById('manage-departments-btn').addEventListener('click', () => openModal('manage-departments-modal'));
@@ -883,7 +1273,6 @@
                 openModal('add-year-modal');
             });
 
-            // [FIXED] Call switchTab when opening the modal to set initial state
             document.getElementById('add-entry-btn').addEventListener('click', () => {
                 if (state.departments.length === 0) {
                     showAlert('Vui lòng thêm ít nhất một Khoa trước khi thêm giờ lao động.'); return;
@@ -895,7 +1284,7 @@
                     showAlert('Không có nhiệm vụ nào được định nghĩa. Vui lòng vào mục "Quản lý Nhiệm vụ" để thêm.'); return;
                 }
                 renderBulkAddModal();
-                switchTab('predefined'); // Reset to default tab and set input disabled states
+                switchTab('predefined');
                 openModal('bulk-add-modal');
             });
 
@@ -915,7 +1304,6 @@
                 }
             });
 
-            // [FIXED] Rewrote the form submission logic for clarity, better validation, and user feedback.
             document.getElementById('bulk-add-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const selectedLecturerIds = Array.from(document.querySelectorAll('.lecturer-checkbox:checked')).map(cb => cb.value);
@@ -940,7 +1328,7 @@
                         }
                         description = task.name;
                         hours = task.hours * quantity;
-                    } else { // activeTab === 'tab-custom'
+                    } else {
                         const customDesc = document.getElementById('custom-task-description').value.trim();
                         hours = parseFloat(document.getElementById('custom-task-hours').value);
                         date = document.getElementById('custom-entry-date').value;
@@ -1026,7 +1414,6 @@
 
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Set initial year
             state.selectedYear = getCurrentAcademicYear();
             addEventListeners();
             initializeFirebase();
