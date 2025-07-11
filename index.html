@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Giờ Lao động B - Đại học Hải Phòng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            -webkit-animation-name: fadeIn;
+            -webkit-animation-duration: 0.4s;
+            animation-name: fadeIn;
+            animation-duration: 0.4s
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 24px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            -webkit-animation-name: slideIn;
+            -webkit-animation-duration: 0.4s;
+            animation-name: slideIn;
+            animation-duration: 0.4s
+        }
+        @-webkit-keyframes slideIn {
+            from {top: -300px; opacity: 0} 
+            to {top: 0; opacity: 1}
+        }
+        @keyframes slideIn {
+            from {margin-top: -5%; opacity: 0} 
+            to {margin-top: 5%; opacity: 1}
+        }
+        @-webkit-keyframes fadeIn {
+            from {opacity: 0} 
+            to {opacity: 1}
+        }
+        @keyframes fadeIn {
+            from {opacity: 0} 
+            to {opacity: 1}
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            border-color: #2563eb;
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-800">Hệ thống Quản lý Giờ Lao động B</h1>
+            <p class="text-lg text-gray-600">Trường Đại học Hải Phòng</p>
+        </div>
+
+        <!-- Filters and Management -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 items-end">
+            <div>
+                <label for="department-select" class="block text-sm font-medium text-gray-700 mb-1">Chọn Khoa:</label>
+                <select id="department-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+            </div>
+            <div>
+                <label for="year-select" class="block text-sm font-medium text-gray-700 mb-1">Chọn Năm học:</label>
+                <div class="flex items-center gap-2">
+                    <select id="year-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                    <button id="add-year-btn" class="p-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg shadow-sm" title="Thêm năm học mới"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
+                 <button id="manage-tasks-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <i class="fas fa-tasks mr-2"></i>Nhiệm vụ
+                </button>
+                 <button id="manage-departments-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <i class="fas fa-building mr-2"></i>Khoa
+                </button>
+                <button id="manage-lecturers-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <i class="fas fa-users mr-2"></i>Giảng viên
+                </button>
+                <button id="add-entry-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <i class="fas fa-plus-circle mr-2"></i>Thêm Giờ
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content: Lecturers Table -->
+        <div id="main-content">
+            <h2 id="department-title" class="text-2xl font-bold text-gray-800 mb-4">Tổng hợp Giờ Lao động B</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">STT</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Họ và Tên</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Mã Giảng viên</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Tổng Giờ LĐ B (Năm học)</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lecturers-table-body" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Manage Tasks Modal -->
+    <div id="manage-tasks-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('manage-tasks-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Quản lý Nhiệm vụ Quy đổi</h3>
+            <form id="task-form" class="mb-4 p-4 border rounded-lg bg-gray-50">
+                <input type="hidden" id="task-id">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div class="md:col-span-2">
+                        <label for="task-name" class="block text-sm font-medium text-gray-700">Tên nhiệm vụ</label>
+                        <input type="text" id="task-name" placeholder="VD: Tham gia hội thảo khoa học" required class="mt-1 p-2 border rounded-md w-full">
+                    </div>
+                    <div>
+                        <label for="task-unit" class="block text-sm font-medium text-gray-700">Đơn vị tính</label>
+                        <input type="text" id="task-unit" placeholder="VD: buổi" required class="mt-1 p-2 border rounded-md w-full">
+                    </div>
+                    <div>
+                        <label for="task-hours" class="block text-sm font-medium text-gray-700">Số giờ quy đổi</label>
+                        <input type="number" id="task-hours" placeholder="VD: 12" min="0" step="0.5" required class="mt-1 p-2 border rounded-md w-full">
+                    </div>
+                    <div class="md:col-span-2 flex items-end gap-2">
+                         <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-md">Lưu Nhiệm vụ</button>
+                         <button type="button" id="clear-task-form-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-black p-2 rounded-md">Làm mới</button>
+                    </div>
+                </div>
+            </form>
+            <div class="overflow-x-auto max-h-80">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Tên Nhiệm vụ</th>
+                            <th class="px-4 py-2 text-left">Đơn vị</th>
+                            <th class="px-4 py-2 text-center">Giờ</th>
+                            <th class="px-4 py-2 text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasks-list-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bulk Add Entry Modal -->
+    <div id="bulk-add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('bulk-add-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Thêm Giờ Lao động hàng loạt</h3>
+            <div class="mb-4">
+                <label for="bulk-add-department-select" class="block text-sm font-medium text-gray-700">Áp dụng cho Khoa:</label>
+                <select id="bulk-add-department-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50"></select>
+            </div>
+            <div class="mb-4 border-b border-gray-200">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    <button id="tab-predefined" class="tab-button active px-3 py-2 font-medium text-sm rounded-t-lg border-b-2" onclick="switchTab('predefined')">Nhiệm vụ có sẵn</button>
+                    <button id="tab-custom" class="tab-button px-3 py-2 font-medium text-sm rounded-t-lg border-b-2" onclick="switchTab('custom')">Nhiệm vụ khác</button>
+                </nav>
+            </div>
+            <form id="bulk-add-form">
+                <div id="predefined-task-form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="task-select" class="block text-sm font-medium text-gray-700">Nhiệm vụ</label>
+                            <select id="task-select" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                        </div>
+                        <div>
+                            <label for="task-quantity" class="block text-sm font-medium text-gray-700">Số lượng</label>
+                            <input type="number" id="task-quantity" value="1" min="1" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="entry-date" class="block text-sm font-medium text-gray-700">Ngày thực hiện</label>
+                            <input type="date" id="entry-date" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Số giờ quy đổi / 1 GV</label>
+                            <p id="calculated-hours" class="mt-1 text-lg font-bold text-blue-600">0 giờ</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="custom-task-form" style="display: none;">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="custom-task-description" class="block text-sm font-medium text-gray-700">Nội dung công việc</label>
+                            <textarea id="custom-task-description" rows="2" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div>
+                            <label for="custom-task-hours" class="block text-sm font-medium text-gray-700">Số giờ lao động B</label>
+                            <input type="number" id="custom-task-hours" min="0" step="0.5" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="custom-entry-date" class="block text-sm font-medium text-gray-700">Ngày thực hiện</label>
+                            <input type="date" id="custom-entry-date" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-800 mb-2">Chọn Giảng viên để áp dụng</h4>
+                    <div class="flex items-center mb-2">
+                        <input type="checkbox" id="select-all-lecturers" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="select-all-lecturers" class="ml-2 block text-sm text-gray-900">Chọn tất cả</label>
+                    </div>
+                    <div id="lecturer-checklist" class="max-h-48 overflow-y-auto border rounded-md p-2 grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Lưu cho các GV đã chọn</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Lecturers Modal -->
+    <div id="manage-lecturers-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('manage-lecturers-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Quản lý Giảng viên</h3>
+            <form id="lecturer-form" class="mb-4 p-4 border rounded-lg bg-gray-50">
+                <input type="hidden" id="lecturer-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                    <div>
+                        <label for="lecturer-name" class="block text-sm font-medium text-gray-700">Họ và tên</label>
+                        <input type="text" id="lecturer-name" placeholder="VD: Nguyễn Văn A" required class="mt-1 p-2 border rounded-md w-full">
+                    </div>
+                    <div>
+                        <label for="lecturer-code" class="block text-sm font-medium text-gray-700">Mã giảng viên</label>
+                        <input type="text" id="lecturer-code" placeholder="VD: GV001" required class="mt-1 p-2 border rounded-md w-full">
+                    </div>
+                    <div>
+                        <label for="lecturer-department" class="block text-sm font-medium text-gray-700">Khoa</label>
+                        <select id="lecturer-department" required class="mt-1 p-2 border rounded-md w-full">
+                            <option value="">-- Chọn Khoa --</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-md">Lưu Giảng viên</button>
+                </div>
+            </form>
+            <div class="overflow-x-auto max-h-80">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Họ và Tên</th>
+                            <th class="px-4 py-2 text-left">Mã GV</th>
+                            <th class="px-4 py-2 text-left">Khoa</th>
+                            <th class="px-4 py-2 text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lecturers-list-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Manage Departments Modal -->
+    <div id="manage-departments-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('manage-departments-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Quản lý Khoa</h3>
+            <form id="department-form" class="mb-4 flex gap-2">
+                <input type="hidden" id="department-id">
+                <input type="text" id="department-name" placeholder="Tên khoa" required class="flex-grow p-2 border rounded-md">
+                <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-md">Lưu Khoa</button>
+            </form>
+            <div class="overflow-x-auto max-h-80">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Tên Khoa</th>
+                            <th class="px-4 py-2 text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departments-list-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('details-modal')">&times;</span>
+            <h3 id="details-title" class="text-xl font-bold mb-4">Chi tiết Giờ Lao động</h3>
+            <div id="details-content" class="max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Add Year Modal -->
+    <div id="add-year-modal" class="modal">
+        <div class="modal-content max-w-md">
+            <span class="close-button" onclick="closeModal('add-year-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Thêm Năm học mới</h3>
+            <form id="add-year-form">
+                <label for="new-year-input" class="block text-sm font-medium text-gray-700">Năm học (định dạng YYYY-YYYY)</label>
+                <input type="text" id="new-year-input" placeholder="2025-2026" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="modal">
+        <div class="modal-content max-w-sm">
+             <h3 class="text-lg font-bold mb-4 text-yellow-600">Thông báo</h3>
+            <p id="alert-message" class="mb-6"></p>
+            <div class="flex justify-end">
+                <button id="alert-ok-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content max-w-sm">
+            <h3 class="text-lg font-bold mb-4">Xác nhận</h3>
+            <p id="confirm-message" class="mb-6"></p>
+            <div class="flex justify-end gap-3">
+                <button id="confirm-btn-no" class="bg-gray-200 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded-lg">Hủy</button>
+                <button id="confirm-btn-yes" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, updateDoc, deleteDoc, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Default data for seeding
+        const DEFAULT_TASKS = [
+            { name: "Tham gia các cuộc họp và sinh hoạt chuyên môn", unit: "buổi", hours: 6 },
+            { name: "Tham gia hội thảo khoa học trong Trường", unit: "buổi", hours: 12 },
+            { name: "Tham gia hội thảo khoa học ngoài Trường", unit: "buổi", hours: 20 },
+            { name: "Tham gia thi THPT", unit: "nhiệm vụ", hours: 50 },
+            { name: "Nghiên cứu trình bày chuyên đề mới", unit: "chuyên đề", hours: 45 },
+            { name: "Dự giờ và đánh giá giảng viên khác", unit: "tiết", hours: 5 },
+            { name: "Tham gia hoạt động phục vụ cộng đồng", unit: "hoạt động", hours: 12 },
+            { name: "Tự học nâng cao Tin học, chuyên môn", unit: "khoá học", hours: 50 },
+            { name: "Tự học nâng cao trình độ Ngoại ngữ", unit: "khoá học", hours: 100 },
+            { name: "Hướng dẫn giảng viên tập sự, thử việc", unit: "nhiệm vụ", hours: 100 },
+            { name: "Rà soát, chỉnh sửa chương trình đào tạo", unit: "buổi", hours: 12 },
+            { name: "Thực hiện các nhiệm vụ khác được phân công", unit: "nhiệm vụ", hours: 12 },
+            { name: "Đưa sinh viên đi trải nghiệm doanh nghiệp", unit: "ngày", hours: 15 }
+        ];
+
+        // Global state object
+        let state = {
+            departments: [],
+            lecturers: [],
+            entries: [],
+            tasks: [],
+            customYears: [],
+            selectedDepartmentId: null,
+            selectedYear: null,
+        };
+        
+        // Firebase variables
+        let db, auth;
+        let departmentsCol, lecturersCol, tasksCol, entriesCol, settingsCol;
+        const SETTINGS_DOC_ID = 'appSettings';
+
+        // --- Custom Alert/Confirm Modal Logic ---
+        function showAlert(message) {
+            const modal = document.getElementById('alert-modal');
+            document.getElementById('alert-message').textContent = message;
+            modal.style.display = 'block';
+            document.getElementById('alert-ok-btn').onclick = () => {
+                modal.style.display = 'none';
+            };
+        }
+        
+        function showConfirm(message, onConfirm) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-message').textContent = message;
+            const yesBtn = document.getElementById('confirm-btn-yes');
+            const noBtn = document.getElementById('confirm-btn-no');
+            const close = () => modal.style.display = 'none';
+            const confirmAndClose = () => {
+                onConfirm();
+                close();
+            };
+            yesBtn.onclick = confirmAndClose;
+            noBtn.onclick = close;
+            modal.style.display = 'block';
+        }
+
+        // --- Date & Year Logic ---
+        function getAcademicYear(date) {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = d.getMonth(); // 0-11
+            if (month >= 7) { // Academic year starts in August (month 7)
+                return `${year}-${year + 1}`;
+            } else {
+                return `${year - 1}-${year}`;
+            }
+        }
+
+        function getCurrentAcademicYear() {
+            return getAcademicYear(new Date());
+        }
+
+        // --- UI Rendering ---
+        function render() {
+            renderDepartmentSelect();
+            renderYearSelect();
+            renderLecturerTable();
+            renderDepartmentsList();
+            renderLecturersList();
+            renderTasksList();
+        }
+
+        function renderDepartmentSelect() {
+            const select = document.getElementById('department-select');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="all">-- Tất cả các Khoa --</option>';
+            state.departments.forEach(dep => {
+                const option = document.createElement('option');
+                option.value = dep.id;
+                option.textContent = dep.name;
+                select.appendChild(option);
+            });
+            select.value = currentVal;
+        }
+
+        function renderYearSelect() {
+            const select = document.getElementById('year-select');
+            const yearsFromEntries = new Set(state.entries.map(e => getAcademicYear(e.date)));
+            const customYearsSet = new Set(state.customYears);
+            const allYears = new Set([ ...yearsFromEntries, ...customYearsSet, getCurrentAcademicYear() ]);
+            const sortedYears = Array.from(allYears).sort().reverse();
+            select.innerHTML = '';
+            sortedYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `Năm học ${year}`;
+                option.selected = year === state.selectedYear;
+                select.appendChild(option);
+            });
+        }
+        
+        function renderLecturerTable() {
+            const tableBody = document.getElementById('lecturers-table-body');
+            const departmentTitle = document.getElementById('department-title');
+            tableBody.innerHTML = '';
+            let filteredLecturers = state.lecturers;
+            if (state.selectedDepartmentId && state.selectedDepartmentId !== 'all') {
+                filteredLecturers = state.lecturers.filter(l => l.departmentId === state.selectedDepartmentId);
+                const dep = state.departments.find(d => d.id === state.selectedDepartmentId);
+                departmentTitle.textContent = `Khoa ${dep ? dep.name : ''}`;
+            } else {
+                 departmentTitle.textContent = 'Toàn trường';
+            }
+            if(filteredLecturers.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-gray-500">Chưa có giảng viên nào trong khoa này.</td></tr>`;
+                return;
+            }
+            filteredLecturers.forEach((lecturer, index) => {
+                const totalHours = state.entries
+                    .filter(e => e.lecturerId === lecturer.id && getAcademicYear(e.date) === state.selectedYear)
+                    .reduce((sum, e) => sum + e.hours, 0);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${lecturer.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">${lecturer.code}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center font-bold text-lg text-red-600">${totalHours}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <button class="text-blue-600 hover:text-blue-800" onclick="showDetails('${lecturer.id}')">Xem chi tiết</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function renderDepartmentsList() {
+            const listBody = document.getElementById('departments-list-body');
+            listBody.innerHTML = '';
+            state.departments.forEach(dep => {
+                const row = document.createElement('tr');
+                row.className = "border-b";
+                row.innerHTML = `
+                    <td class="px-4 py-2">${dep.name}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button class="text-blue-500 mr-2" onclick="editDepartment('${dep.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="text-red-500" onclick="deleteDepartment('${dep.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                listBody.appendChild(row);
+            });
+        }
+
+        function renderLecturersList() {
+            const listBody = document.getElementById('lecturers-list-body');
+            const depSelect = document.getElementById('lecturer-department');
+            const currentVal = depSelect.value;
+            depSelect.innerHTML = '<option value="">-- Chọn Khoa --</option>';
+            state.departments.forEach(dep => {
+                const option = document.createElement('option');
+                option.value = dep.id;
+                option.textContent = dep.name;
+                depSelect.appendChild(option);
+            });
+            depSelect.value = currentVal;
+
+            listBody.innerHTML = '';
+            state.lecturers.forEach(lecturer => {
+                const department = state.departments.find(d => d.id === lecturer.departmentId);
+                const row = document.createElement('tr');
+                 row.className = "border-b";
+                row.innerHTML = `
+                    <td class="px-4 py-2">${lecturer.name}</td>
+                    <td class="px-4 py-2">${lecturer.code}</td>
+                    <td class="px-4 py-2">${department?.name || 'Chưa phân khoa'}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button class="text-blue-500 mr-2" onclick="editLecturer('${lecturer.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="text-red-500" onclick="deleteLecturer('${lecturer.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                listBody.appendChild(row);
+            });
+        }
+
+        function renderTasksList() {
+            const listBody = document.getElementById('tasks-list-body');
+            listBody.innerHTML = '';
+            state.tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.className = "border-b";
+                row.innerHTML = `
+                    <td class="px-4 py-2">${task.name}</td>
+                    <td class="px-4 py-2">${task.unit}</td>
+                    <td class="px-4 py-2 text-center font-semibold">${task.hours}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button class="text-blue-500 mr-2" onclick="editTask('${task.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="text-red-500" onclick="deleteTask('${task.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                listBody.appendChild(row);
+            });
+        }
+
+        function renderLecturerChecklistInModal(departmentId) {
+            const checklist = document.getElementById('lecturer-checklist');
+            checklist.innerHTML = '';
+            const lecturersInDept = state.lecturers.filter(l => l.departmentId === departmentId);
+            document.getElementById('select-all-lecturers').checked = false; 
+
+            if (lecturersInDept.length > 0) {
+                lecturersInDept.forEach(lecturer => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center';
+                    div.innerHTML = `
+                        <input type="checkbox" id="lecturer-${lecturer.id}" name="lecturer" value="${lecturer.id}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 lecturer-checkbox">
+                        <label for="lecturer-${lecturer.id}" class="ml-2 text-sm text-gray-700">${lecturer.name}</label>
+                    `;
+                    checklist.appendChild(div);
+                });
+            } else {
+                checklist.innerHTML = '<p class="text-gray-500 text-sm">Không có giảng viên nào trong khoa được chọn.</p>';
+            }
+        }
+
+        function renderBulkAddModal() {
+            const modalDepSelect = document.getElementById('bulk-add-department-select');
+            modalDepSelect.innerHTML = '';
+            state.departments.forEach(dep => {
+                const option = document.createElement('option');
+                option.value = dep.id;
+                option.textContent = dep.name;
+                modalDepSelect.appendChild(option);
+            });
+            if (state.selectedDepartmentId && state.selectedDepartmentId !== 'all') {
+                 modalDepSelect.value = state.selectedDepartmentId;
+            }
+            renderLecturerChecklistInModal(modalDepSelect.value);
+
+            const taskSelect = document.getElementById('task-select');
+            taskSelect.innerHTML = '';
+            state.tasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.id;
+                option.textContent = task.name;
+                taskSelect.appendChild(option);
+            });
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entry-date').value = today;
+            document.getElementById('custom-entry-date').value = today;
+            
+            updateCalculatedHours();
+        }
+
+        function updateCalculatedHours() {
+            const taskId = document.getElementById('task-select').value;
+            const quantity = document.getElementById('task-quantity').value;
+            const task = state.tasks.find(t => t.id === taskId);
+            if (task && quantity > 0) {
+                const total = task.hours * quantity;
+                document.getElementById('calculated-hours').textContent = `${total} giờ`;
+            } else {
+                document.getElementById('calculated-hours').textContent = `0 giờ`;
+            }
+        }
+        
+        function clearTaskForm() {
+            document.getElementById('task-form').reset();
+            document.getElementById('task-id').value = '';
+        }
+
+        // --- Global Functions (for inline onclick) ---
+        window.openModal = (modalId) => document.getElementById(modalId).style.display = 'block';
+        window.closeModal = (modalId) => document.getElementById(modalId).style.display = 'none';
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) event.target.style.display = "none";
+        };
+        window.switchTab = (tabName) => {
+            document.getElementById('predefined-task-form').style.display = tabName === 'predefined' ? 'block' : 'none';
+            document.getElementById('custom-task-form').style.display = tabName === 'custom' ? 'block' : 'none';
+            document.getElementById('tab-predefined').classList.toggle('active', tabName === 'predefined');
+            document.getElementById('tab-custom').classList.toggle('active', tabName === 'custom');
+        };
+        window.showDetails = (lecturerId) => {
+            const lecturer = state.lecturers.find(l => l.id === lecturerId);
+            const lecturerEntries = state.entries
+                .filter(e => e.lecturerId === lecturerId && getAcademicYear(e.date) === state.selectedYear)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            document.getElementById('details-title').textContent = `Chi tiết giờ LĐ (${state.selectedYear}) - ${lecturer.name}`;
+            const contentDiv = document.getElementById('details-content');
+            contentDiv.innerHTML = '';
+            if (lecturerEntries.length === 0) {
+                contentDiv.innerHTML = '<p class="text-gray-500">Chưa có giờ lao động nào được ghi nhận trong năm học này.</p>';
+            } else {
+                const list = document.createElement('ul');
+                list.className = 'divide-y divide-gray-200';
+                lecturerEntries.forEach(entry => {
+                    const item = document.createElement('li');
+                    item.className = 'py-3 flex justify-between items-center';
+                    item.innerHTML = `
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">${entry.description}</p>
+                            <p class="text-sm text-gray-500">${new Date(entry.date).toLocaleDateString('vi-VN')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-md font-bold text-green-600">${entry.hours} giờ</p>
+                            <button class="text-xs text-red-500 hover:text-red-700 mt-1" onclick="deleteEntry('${entry.id}')">Xóa</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+                contentDiv.appendChild(list);
+            }
+            openModal('details-modal');
+        };
+        window.deleteEntry = async (entryId) => {
+            showConfirm('Bạn có chắc muốn xóa mục này?', async () => {
+                await deleteDoc(doc(entriesCol, entryId));
+            });
+        };
+        window.editDepartment = (id) => {
+            const dep = state.departments.find(d => d.id === id);
+            document.getElementById('department-id').value = dep.id;
+            document.getElementById('department-name').value = dep.name;
+        };
+        window.deleteDepartment = (id) => {
+            showConfirm('Bạn có chắc muốn xóa khoa này? Việc này sẽ xóa tất cả giảng viên và giờ lao động liên quan.', async () => {
+                const batch = writeBatch(db);
+                const lecturerQuery = query(lecturersCol, where("departmentId", "==", id));
+                const lecturerSnapshot = await getDocs(lecturerQuery);
+                const lecturerIds = lecturerSnapshot.docs.map(d => d.id);
+                lecturerSnapshot.forEach(doc => batch.delete(doc.ref));
+                if (lecturerIds.length > 0) {
+                    const entryQuery = query(entriesCol, where("lecturerId", "in", lecturerIds));
+                    const entrySnapshot = await getDocs(entryQuery);
+                    entrySnapshot.forEach(doc => batch.delete(doc.ref));
+                }
+                batch.delete(doc(departmentsCol, id));
+                await batch.commit();
+            });
+        };
+        window.editLecturer = (id) => {
+            const lecturer = state.lecturers.find(l => l.id === id);
+            document.getElementById('lecturer-id').value = lecturer.id;
+            document.getElementById('lecturer-name').value = lecturer.name;
+            document.getElementById('lecturer-code').value = lecturer.code;
+            document.getElementById('lecturer-department').value = lecturer.departmentId;
+        };
+        window.deleteLecturer = (id) => {
+            showConfirm('Bạn có chắc muốn xóa giảng viên này? Mọi giờ lao động của họ cũng sẽ bị xóa.', async () => {
+                const batch = writeBatch(db);
+                batch.delete(doc(lecturersCol, id));
+                const entryQuery = query(entriesCol, where("lecturerId", "==", id));
+                const entrySnapshot = await getDocs(entryQuery);
+                entrySnapshot.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            });
+        };
+        window.editTask = (id) => {
+            const task = state.tasks.find(t => t.id === id);
+            if (task) {
+                document.getElementById('task-id').value = task.id;
+                document.getElementById('task-name').value = task.name;
+                document.getElementById('task-unit').value = task.unit;
+                document.getElementById('task-hours').value = task.hours;
+            }
+        };
+        window.deleteTask = (id) => {
+            showConfirm('Bạn có chắc muốn xóa nhiệm vụ này?', async () => {
+                await deleteDoc(doc(tasksCol, id));
+            });
+        };
+
+        // --- Firebase Initialization and Listeners ---
+        function setupOnSnapshotListeners() {
+            onSnapshot(departmentsCol, (snapshot) => {
+                state.departments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                render();
+            });
+
+            onSnapshot(lecturersCol, (snapshot) => {
+                state.lecturers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                render();
+            });
+            
+            onSnapshot(entriesCol, (snapshot) => {
+                state.entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                render();
+            });
+
+            onSnapshot(tasksCol, (snapshot) => {
+                if (snapshot.empty) {
+                    const batch = writeBatch(db);
+                    DEFAULT_TASKS.forEach(task => {
+                        const newDocRef = doc(collection(db, tasksCol.path));
+                        batch.set(newDocRef, task);
+                    });
+                    batch.commit();
+                } else {
+                    state.tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                }
+                render();
+            });
+
+            onSnapshot(doc(settingsCol, SETTINGS_DOC_ID), (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    state.customYears = docSnapshot.data().customYears || [];
+                } else {
+                    setDoc(doc(settingsCol, SETTINGS_DOC_ID), { customYears: [] });
+                }
+                renderYearSelect();
+            });
+        }
+
+        async function initializeFirebase() {
+            let finalFirebaseConfig;
+            let isUsingEnvConfig = false;
+            
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    finalFirebaseConfig = JSON.parse(__firebase_config);
+                    isUsingEnvConfig = true;
+                } catch (e) {
+                     console.error("Error parsing __firebase_config:", e);
+                }
+            } 
+            
+            if (!finalFirebaseConfig && typeof userFirebaseConfig !== 'undefined' && Object.keys(userFirebaseConfig).length > 0) {
+                finalFirebaseConfig = userFirebaseConfig;
+            }
+
+            if (!finalFirebaseConfig || Object.keys(finalFirebaseConfig).length === 0) {
+                showAlert("Cấu hình Firebase không được cung cấp. Dữ liệu sẽ không được lưu trực tuyến. Vui lòng xem hướng dẫn để biết cách thiết lập.");
+                return;
+            }
+
+            try {
+                const app = initializeApp(finalFirebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (isUsingEnvConfig && token) {
+                    await signInWithCustomToken(auth, token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'hpu-workload-tracker-app';
+                const basePath = `artifacts/${appId}/public/data`;
+
+                departmentsCol = collection(db, `${basePath}/departments`);
+                lecturersCol = collection(db, `${basePath}/lecturers`);
+                tasksCol = collection(db, `${basePath}/tasks`);
+                entriesCol = collection(db, `${basePath}/entries`);
+                settingsCol = collection(db, `${basePath}/settings`);
+                
+                setupOnSnapshotListeners();
+
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+                showAlert(`Lỗi khởi tạo Firebase: ${error.message}`);
+            }
+        }
+
+        // --- Event Handlers ---
+        function addEventListeners() {
+            document.getElementById('department-select').addEventListener('change', (e) => {
+                state.selectedDepartmentId = e.target.value;
+                renderLecturerTable();
+            });
+            document.getElementById('year-select').addEventListener('change', (e) => {
+                state.selectedYear = e.target.value;
+                renderLecturerTable();
+            });
+
+            document.getElementById('manage-tasks-btn').addEventListener('click', () => openModal('manage-tasks-modal'));
+            document.getElementById('manage-lecturers-btn').addEventListener('click', () => openModal('manage-lecturers-modal'));
+            document.getElementById('manage-departments-btn').addEventListener('click', () => openModal('manage-departments-modal'));
+            
+            document.getElementById('add-year-btn').addEventListener('click', () => {
+                const input = document.getElementById('new-year-input');
+                const currentYear = new Date().getFullYear();
+                input.value = '';
+                input.placeholder = `${currentYear}-${currentYear + 1}`;
+                openModal('add-year-modal');
+            });
+
+            document.getElementById('add-entry-btn').addEventListener('click', () => {
+                if (state.departments.length === 0) {
+                    showAlert('Vui lòng thêm ít nhất một Khoa trước khi thêm giờ lao động.'); return;
+                }
+                if (!state.selectedDepartmentId || state.selectedDepartmentId === 'all') {
+                    showAlert('Vui lòng chọn một Khoa cụ thể từ trang chính trước khi thêm giờ lao động.'); return;
+                }
+                if (state.tasks.length === 0) {
+                    showAlert('Không có nhiệm vụ nào được định nghĩa. Vui lòng vào mục "Quản lý Nhiệm vụ" để thêm.'); return;
+                }
+                renderBulkAddModal();
+                openModal('bulk-add-modal');
+            });
+
+            document.getElementById('add-year-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newYear = document.getElementById('new-year-input').value.trim();
+                if (newYear) {
+                    if (!/^\d{4}-\d{4}$/.test(newYear)) { showAlert("Định dạng năm học không hợp lệ."); return; }
+                    const [start, end] = newYear.split('-').map(Number);
+                    if (end !== start + 1) { showAlert("Năm học không hợp lệ."); return; }
+                    if (!state.customYears.includes(newYear)) {
+                        const newYears = [...state.customYears, newYear];
+                        await setDoc(doc(settingsCol, SETTINGS_DOC_ID), { customYears: newYears });
+                        state.selectedYear = newYear;
+                        closeModal('add-year-modal');
+                    } else { showAlert("Năm học này đã tồn tại."); }
+                }
+            });
+
+            document.getElementById('bulk-add-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const selectedLecturerIds = Array.from(document.querySelectorAll('.lecturer-checkbox:checked')).map(cb => cb.value);
+                if (selectedLecturerIds.length === 0) { showAlert('Vui lòng chọn ít nhất một giảng viên.'); return; }
+                
+                const activeTab = document.querySelector('.tab-button.active').id;
+                let description, hours, date;
+                if (activeTab === 'tab-predefined') {
+                    const taskId = document.getElementById('task-select').value;
+                    const quantity = parseInt(document.getElementById('task-quantity').value);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    if (!task) { showAlert('Lỗi: Không tìm thấy nhiệm vụ.'); return; }
+                    description = task.name;
+                    hours = task.hours * quantity;
+                    date = document.getElementById('entry-date').value;
+                } else {
+                    description = `Nhiệm vụ khác: ${document.getElementById('custom-task-description').value}`;
+                    hours = parseFloat(document.getElementById('custom-task-hours').value);
+                    date = document.getElementById('custom-entry-date').value;
+                }
+                if (!description || !date || isNaN(hours) || hours <= 0) { showAlert('Vui lòng điền đầy đủ thông tin hợp lệ.'); return; }
+
+                const batch = writeBatch(db);
+                selectedLecturerIds.forEach(lecturerId => {
+                    const newEntryRef = doc(entriesCol);
+                    batch.set(newEntryRef, { lecturerId, description, hours, date });
+                });
+                await batch.commit();
+                closeModal('bulk-add-modal');
+            });
+
+            document.getElementById('department-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('department-id').value;
+                const name = document.getElementById('department-name').value.trim();
+                if (!name) return;
+                if (id) {
+                    await updateDoc(doc(departmentsCol, id), { name });
+                } else {
+                    await addDoc(departmentsCol, { name });
+                }
+                e.target.reset();
+                document.getElementById('department-id').value = '';
+            });
+
+            document.getElementById('lecturer-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('lecturer-id').value;
+                const name = document.getElementById('lecturer-name').value.trim();
+                const code = document.getElementById('lecturer-code').value.trim();
+                const departmentId = document.getElementById('lecturer-department').value;
+                if (!name || !code || !departmentId) { showAlert("Vui lòng điền đầy đủ thông tin."); return; }
+                const data = { name, code, departmentId };
+                if (id) {
+                    await updateDoc(doc(lecturersCol, id), data);
+                } else {
+                    await addDoc(lecturersCol, data);
+                }
+                e.target.reset();
+                document.getElementById('lecturer-id').value = '';
+            });
+
+            document.getElementById('task-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('task-id').value;
+                const name = document.getElementById('task-name').value.trim();
+                const unit = document.getElementById('task-unit').value.trim();
+                const hours = parseFloat(document.getElementById('task-hours').value);
+                if (!name || !unit || isNaN(hours) || hours < 0) { showAlert("Vui lòng điền đầy đủ thông tin."); return; }
+                const data = { name, unit, hours };
+                if (id) {
+                    await updateDoc(doc(tasksCol, id), data);
+                } else {
+                    await addDoc(tasksCol, data);
+                }
+                clearTaskForm();
+            });
+
+            document.getElementById('task-select').addEventListener('change', updateCalculatedHours);
+            document.getElementById('task-quantity').addEventListener('input', updateCalculatedHours);
+            document.getElementById('bulk-add-department-select').addEventListener('change', (e) => renderLecturerChecklistInModal(e.target.value));
+            document.getElementById('select-all-lecturers').addEventListener('change', (e) => {
+                document.querySelectorAll('.lecturer-checkbox').forEach(checkbox => checkbox.checked = e.target.checked);
+            });
+            document.getElementById('clear-task-form-btn').addEventListener('click', clearTaskForm);
+        }
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            addEventListeners();
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>
