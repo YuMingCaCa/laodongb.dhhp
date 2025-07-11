@@ -336,7 +336,7 @@
     <!-- Alert Modal -->
     <div id="alert-modal" class="modal">
         <div class="modal-content max-w-sm">
-             <h3 class="text-lg font-bold mb-4 text-yellow-600">Thông báo</h3>
+             <h3 id="alert-title" class="text-lg font-bold mb-4">Thông báo</h3>
             <p id="alert-message" class="mb-6"></p>
             <div class="flex justify-end">
                 <button id="alert-ok-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">OK</button>
@@ -359,7 +359,7 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, updateDoc, deleteDoc, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Default data for seeding
@@ -396,9 +396,19 @@
         const SETTINGS_DOC_ID = 'appSettings';
 
         // --- Custom Alert/Confirm Modal Logic ---
-        function showAlert(message) {
+        function showAlert(message, isSuccess = false) {
             const modal = document.getElementById('alert-modal');
+            const title = document.getElementById('alert-title');
             document.getElementById('alert-message').textContent = message;
+            
+            if (isSuccess) {
+                title.textContent = "Thành công";
+                title.className = "text-lg font-bold mb-4 text-green-600";
+            } else {
+                title.textContent = "Thông báo";
+                title.className = "text-lg font-bold mb-4 text-yellow-600";
+            }
+
             modal.style.display = 'block';
             document.getElementById('alert-ok-btn').onclick = () => {
                 modal.style.display = 'none';
@@ -650,12 +660,31 @@
         window.onclick = (event) => {
             if (event.target.classList.contains('modal')) event.target.style.display = "none";
         };
+        
+        // [FIXED] Function to switch tabs in the "Add Hour" modal.
+        // It now disables inputs in the hidden tab to prevent validation issues.
         window.switchTab = (tabName) => {
-            document.getElementById('predefined-task-form').style.display = tabName === 'predefined' ? 'block' : 'none';
-            document.getElementById('custom-task-form').style.display = tabName === 'custom' ? 'block' : 'none';
+            const predefinedForm = document.getElementById('predefined-task-form');
+            const customForm = document.getElementById('custom-task-form');
+            const predefinedInputs = predefinedForm.querySelectorAll('select, input');
+            const customInputs = customForm.querySelectorAll('textarea, input');
+
+            if (tabName === 'predefined') {
+                predefinedForm.style.display = 'block';
+                customForm.style.display = 'none';
+                predefinedInputs.forEach(input => input.disabled = false);
+                customInputs.forEach(input => input.disabled = true);
+            } else {
+                predefinedForm.style.display = 'none';
+                customForm.style.display = 'block';
+                predefinedInputs.forEach(input => input.disabled = true);
+                customInputs.forEach(input => input.disabled = false);
+            }
+
             document.getElementById('tab-predefined').classList.toggle('active', tabName === 'predefined');
             document.getElementById('tab-custom').classList.toggle('active', tabName === 'custom');
         };
+
         window.showDetails = (lecturerId) => {
             const lecturer = state.lecturers.find(l => l.id === lecturerId);
             const lecturerEntries = state.entries
@@ -812,10 +841,8 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Luôn đăng nhập ẩn danh khi chạy trên web
                 await signInAnonymously(auth);
                 
-                // Sử dụng projectId làm app id để đường dẫn nhất quán
                 const appId = firebaseConfig.projectId || 'hpu-workload-tracker-app';
                 const basePath = `artifacts/${appId}/public/data`;
 
@@ -856,6 +883,7 @@
                 openModal('add-year-modal');
             });
 
+            // [FIXED] Call switchTab when opening the modal to set initial state
             document.getElementById('add-entry-btn').addEventListener('click', () => {
                 if (state.departments.length === 0) {
                     showAlert('Vui lòng thêm ít nhất một Khoa trước khi thêm giờ lao động.'); return;
@@ -867,6 +895,7 @@
                     showAlert('Không có nhiệm vụ nào được định nghĩa. Vui lòng vào mục "Quản lý Nhiệm vụ" để thêm.'); return;
                 }
                 renderBulkAddModal();
+                switchTab('predefined'); // Reset to default tab and set input disabled states
                 openModal('bulk-add-modal');
             });
 
@@ -886,35 +915,57 @@
                 }
             });
 
+            // [FIXED] Rewrote the form submission logic for clarity, better validation, and user feedback.
             document.getElementById('bulk-add-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const selectedLecturerIds = Array.from(document.querySelectorAll('.lecturer-checkbox:checked')).map(cb => cb.value);
-                if (selectedLecturerIds.length === 0) { showAlert('Vui lòng chọn ít nhất một giảng viên.'); return; }
-                
+                if (selectedLecturerIds.length === 0) {
+                    showAlert('Vui lòng chọn ít nhất một giảng viên.');
+                    return;
+                }
+
                 const activeTab = document.querySelector('.tab-button.active').id;
                 let description, hours, date;
-                if (activeTab === 'tab-predefined') {
-                    const taskId = document.getElementById('task-select').value;
-                    const quantity = parseInt(document.getElementById('task-quantity').value);
-                    const task = state.tasks.find(t => t.id === taskId);
-                    if (!task) { showAlert('Lỗi: Không tìm thấy nhiệm vụ.'); return; }
-                    description = task.name;
-                    hours = task.hours * quantity;
-                    date = document.getElementById('entry-date').value;
-                } else {
-                    description = `Nhiệm vụ khác: ${document.getElementById('custom-task-description').value}`;
-                    hours = parseFloat(document.getElementById('custom-task-hours').value);
-                    date = document.getElementById('custom-entry-date').value;
-                }
-                if (!description || !date || isNaN(hours) || hours <= 0) { showAlert('Vui lòng điền đầy đủ thông tin hợp lệ.'); return; }
 
-                const batch = writeBatch(db);
-                selectedLecturerIds.forEach(lecturerId => {
-                    const newEntryRef = doc(entriesCol);
-                    batch.set(newEntryRef, { lecturerId, description, hours, date });
-                });
-                await batch.commit();
-                closeModal('bulk-add-modal');
+                try {
+                    if (activeTab === 'tab-predefined') {
+                        const taskId = document.getElementById('task-select').value;
+                        const quantity = parseInt(document.getElementById('task-quantity').value, 10);
+                        const task = state.tasks.find(t => t.id === taskId);
+                        date = document.getElementById('entry-date').value;
+
+                        if (!task || !date || isNaN(quantity) || quantity <= 0) {
+                            showAlert('Vui lòng điền đầy đủ thông tin cho nhiệm vụ có sẵn.');
+                            return;
+                        }
+                        description = task.name;
+                        hours = task.hours * quantity;
+                    } else { // activeTab === 'tab-custom'
+                        const customDesc = document.getElementById('custom-task-description').value.trim();
+                        hours = parseFloat(document.getElementById('custom-task-hours').value);
+                        date = document.getElementById('custom-entry-date').value;
+
+                        if (!customDesc || !date || isNaN(hours) || hours <= 0) {
+                            showAlert('Vui lòng điền đầy đủ và hợp lệ các thông tin cho nhiệm vụ khác.');
+                            return;
+                        }
+                        description = `Nhiệm vụ khác: ${customDesc}`;
+                    }
+
+                    const batch = writeBatch(db);
+                    selectedLecturerIds.forEach(lecturerId => {
+                        const newEntryRef = doc(entriesCol);
+                        batch.set(newEntryRef, { lecturerId, description, hours, date });
+                    });
+
+                    await batch.commit();
+                    closeModal('bulk-add-modal');
+                    showAlert('Đã thêm giờ lao động thành công!', true);
+
+                } catch (error) {
+                    console.error("Error adding entries:", error);
+                    showAlert(`Đã xảy ra lỗi khi lưu: ${error.message}`);
+                }
             });
 
             document.getElementById('department-form').addEventListener('submit', async (e) => {
@@ -975,6 +1026,8 @@
 
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Set initial year
+            state.selectedYear = getCurrentAcademicYear();
             addEventListeners();
             initializeFirebase();
         });
