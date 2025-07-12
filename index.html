@@ -33,7 +33,7 @@
             padding: 24px;
             border: 1px solid #888;
             width: 90%;
-            max-width: 700px;
+            max-width: 800px;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             -webkit-animation-name: slideIn;
@@ -76,6 +76,51 @@
         }
         .hidden {
             display: none;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f9f9f9;
+            min-width: 220px; /* Increased width */
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 10;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .dropdown-content button {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Increased gap */
+            width: 100%;
+            text-align: left;
+            font-weight: 500;
+        }
+        .dropdown-content button:hover {background-color: #e5e7eb}
+        .dropdown:hover .dropdown-content {display: block;}
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-report-area, #print-report-area * {
+                visibility: visible;
+            }
+            #print-report-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                margin: 0;
+            }
         }
     </style>
 </head>
@@ -175,27 +220,36 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
-                    <button id="manage-users-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
-                        <i class="fas fa-user-shield mr-2"></i>Người dùng
-                    </button>
-                    <button id="manage-tasks-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
-                        <i class="fas fa-tasks mr-2"></i>Nhiệm vụ
-                    </button>
-                    <button id="manage-departments-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
-                        <i class="fas fa-building mr-2"></i>Khoa
-                    </button>
-                    <button id="manage-lecturers-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
-                        <i class="fas fa-users mr-2"></i>Giảng viên
-                    </button>
-                    <button id="add-entry-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md admin-only">
-                        <i class="fas fa-plus-circle mr-2"></i>Thêm Giờ
-                    </button>
+                    <!-- Tools Dropdown -->
+                    <div class="dropdown admin-only">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center gap-2">
+                            <i class="fas fa-tools"></i> Công cụ & Tác vụ <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <button id="add-entry-btn"><i class="fas fa-plus-circle fa-fw text-green-500"></i>Thêm Giờ</button>
+                            <button id="bulk-edit-tool-btn"><i class="fas fa-edit fa-fw text-orange-500"></i>Sửa Hàng loạt</button>
+                            <button id="bulk-delete-tool-btn"><i class="fas fa-eraser fa-fw text-red-500"></i>Xóa Hàng loạt</button>
+                            <button id="statistics-tool-btn"><i class="fas fa-chart-bar fa-fw text-indigo-500"></i>Thống kê & Báo cáo</button>
+                        </div>
+                    </div>
+                     <!-- Management Dropdown -->
+                    <div class="dropdown admin-only">
+                        <button class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center gap-2">
+                            <i class="fas fa-cogs"></i> Quản lý hệ thống <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <button id="manage-users-btn"><i class="fas fa-user-shield fa-fw text-yellow-600"></i>Người dùng</button>
+                            <button id="manage-tasks-btn"><i class="fas fa-tasks fa-fw text-purple-600"></i>Nhiệm vụ</button>
+                            <button id="manage-departments-btn"><i class="fas fa-building fa-fw text-blue-600"></i>Khoa</button>
+                            <button id="manage-lecturers-btn"><i class="fas fa-users fa-fw text-green-600"></i>Giảng viên</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Main Content: Lecturers Table -->
             <div id="main-content">
-                <h2 id="department-title" class="text-2xl font-bold text-gray-800 mb-4">Tổng hợp Giờ Lao động B</h2>
+                <h2 id="department-title" class="text-2xl font-bold text-gray-800 mb-4">Tổng hợp Giờ Lao động</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white border border-gray-200 rounded-lg">
                         <thead class="bg-gray-100">
@@ -203,7 +257,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">STT</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Họ và Tên</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Mã Giảng viên</th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Tổng Giờ LĐ B (Năm học)</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Tổng giờ lao động khác</th>
                                 <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Hành động</th>
                             </tr>
                         </thead>
@@ -214,11 +268,50 @@
         </div>
     </div>
     
+    <!-- Print Report Area (Hidden by default) -->
+    <div id="print-report-area" class="hidden"></div>
+    
     <!-- Modals -->
+    <!-- Statistics Modal -->
+    <div id="statistics-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button no-print" onclick="closeModal('statistics-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Thống kê & Báo cáo</h3>
+            <div class="p-4 border rounded-lg bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label for="stats-department-select" class="block text-sm font-medium text-gray-700">Khoa</label>
+                    <select id="stats-department-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                </div>
+                <div>
+                    <label for="stats-year-select" class="block text-sm font-medium text-gray-700">Năm học</label>
+                    <select id="stats-year-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                </div>
+                <div>
+                    <label for="stats-lecturer-select" class="block text-sm font-medium text-gray-700">Giảng viên</label>
+                    <select id="stats-lecturer-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                </div>
+                <div class="md:col-span-3">
+                    <button id="view-statistics-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-search mr-2"></i>Xem thống kê
+                    </button>
+                </div>
+            </div>
+            <div id="statistics-results-container" class="mt-4 hidden">
+                <h4 id="statistics-results-title" class="font-semibold text-gray-800 mb-2">Kết quả thống kê:</h4>
+                <div id="statistics-results-table" class="max-h-80 overflow-y-auto border rounded-md"></div>
+                <div class="mt-4 flex justify-end">
+                    <button id="print-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-print mr-2"></i>In Báo cáo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Change Password Modal -->
     <div id="change-password-modal" class="modal">
         <div class="modal-content max-w-md">
-            <span class="close-button" onclick="closeModal('change-password-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('change-password-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Đổi mật khẩu</h3>
             <form id="change-password-form" class="space-y-4">
                 <div>
@@ -243,7 +336,7 @@
     <!-- Manage Users Modal -->
     <div id="manage-users-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('manage-users-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('manage-users-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Quản lý Người dùng</h3>
             <div class="overflow-x-auto max-h-96">
                 <table class="min-w-full bg-white">
@@ -260,10 +353,10 @@
         </div>
     </div>
 
-    <!-- Other Modals... -->
+    <!-- Manage Tasks Modal -->
     <div id="manage-tasks-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('manage-tasks-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('manage-tasks-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Quản lý Nhiệm vụ Quy đổi</h3>
             <form id="task-form" class="mb-4 p-4 border rounded-lg bg-gray-50">
                 <input type="hidden" id="task-id">
@@ -301,13 +394,21 @@
             </div>
         </div>
     </div>
+    
+    <!-- Bulk Add Modal -->
     <div id="bulk-add-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('bulk-add-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('bulk-add-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Thêm Giờ Lao động hàng loạt</h3>
-            <div class="mb-4">
-                <label for="bulk-add-department-select" class="block text-sm font-medium text-gray-700">Áp dụng cho Khoa:</label>
-                <select id="bulk-add-department-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50"></select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="bulk-add-department-select" class="block text-sm font-medium text-gray-700">Áp dụng cho Khoa:</label>
+                    <select id="bulk-add-department-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50"></select>
+                </div>
+                <div>
+                    <label for="bulk-add-year-select" class="block text-sm font-medium text-gray-700">Lưu vào Năm học:</label>
+                    <select id="bulk-add-year-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50"></select>
+                </div>
             </div>
             <div class="mb-4 border-b border-gray-200">
                 <nav class="flex space-x-4" aria-label="Tabs">
@@ -327,10 +428,26 @@
                             <input type="number" id="task-quantity" value="1" min="1" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                         </div>
                         <div>
-                            <label for="entry-date" class="block text-sm font-medium text-gray-700">Ngày thực hiện</label>
+                            <label for="entry-date" class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
                             <input type="date" id="entry-date" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                         </div>
                         <div>
+                            <label for="end-date" class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+                            <input type="date" id="end-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="start-time" class="block text-sm font-medium text-gray-700">Thời gian bắt đầu</label>
+                            <input type="time" id="start-time" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="end-time" class="block text-sm font-medium text-gray-700">Thời gian kết thúc</label>
+                            <input type="time" id="end-time" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="predefined-notes" class="block text-sm font-medium text-gray-700">Ghi chú</label>
+                            <textarea id="predefined-notes" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700">Số giờ quy đổi / 1 GV</label>
                             <p id="calculated-hours" class="mt-1 text-lg font-bold text-blue-600">0 giờ</p>
                         </div>
@@ -343,12 +460,28 @@
                             <textarea id="custom-task-description" rows="2" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
                         </div>
                         <div>
+                            <label for="custom-entry-date" class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+                            <input type="date" id="custom-entry-date" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="custom-end-date" class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+                            <input type="date" id="custom-end-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="custom-start-time" class="block text-sm font-medium text-gray-700">Thời gian bắt đầu</label>
+                            <input type="time" id="custom-start-time" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="custom-end-time" class="block text-sm font-medium text-gray-700">Thời gian kết thúc</label>
+                            <input type="time" id="custom-end-time" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="md:col-span-2">
                             <label for="custom-task-hours" class="block text-sm font-medium text-gray-700">Số giờ lao động B</label>
                             <input type="number" id="custom-task-hours" min="0" step="0.5" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                         </div>
-                        <div>
-                            <label for="custom-entry-date" class="block text-sm font-medium text-gray-700">Ngày thực hiện</label>
-                            <input type="date" id="custom-entry-date" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <div class="md:col-span-2">
+                            <label for="custom-notes" class="block text-sm font-medium text-gray-700">Ghi chú</label>
+                            <textarea id="custom-notes" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
                         </div>
                     </div>
                 </div>
@@ -366,9 +499,11 @@
             </form>
         </div>
     </div>
+    
+    <!-- Manage Lecturers Modal -->
     <div id="manage-lecturers-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('manage-lecturers-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('manage-lecturers-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Quản lý Giảng viên</h3>
             <form id="lecturer-form" class="mb-4 p-4 border rounded-lg bg-gray-50">
                 <input type="hidden" id="lecturer-id">
@@ -405,9 +540,11 @@
             </div>
         </div>
     </div>
+    
+    <!-- Manage Departments Modal -->
     <div id="manage-departments-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('manage-departments-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('manage-departments-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Quản lý Khoa</h3>
             <form id="department-form" class="mb-4 flex gap-2">
                 <input type="hidden" id="department-id">
@@ -427,16 +564,73 @@
             </div>
         </div>
     </div>
+    
+    <!-- Details Modal -->
     <div id="details-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('details-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('details-modal')">&times;</span>
             <h3 id="details-title" class="text-xl font-bold mb-4">Chi tiết Giờ Lao động</h3>
-            <div id="details-content" class="max-h-96 overflow-y-auto"></div>
+            <div id="details-controls" class="mb-4 p-2 border rounded-lg bg-gray-50 flex items-center justify-between no-print admin-only">
+                <div class="flex items-center">
+                    <input type="checkbox" id="select-all-entries" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="select-all-entries" class="ml-2 text-sm text-gray-700">Chọn tất cả</label>
+                </div>
+                <button id="delete-selected-entries-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg text-sm">
+                    <i class="fas fa-trash-alt mr-1"></i>Xóa mục đã chọn
+                </button>
+            </div>
+            <div id="details-content" class="max-h-80 overflow-y-auto"></div>
         </div>
     </div>
+    
+    <!-- Edit Entry Modal -->
+     <div id="edit-entry-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button no-print" onclick="closeModal('edit-entry-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Chỉnh sửa Mục Giờ Lao động</h3>
+            <form id="edit-entry-form">
+                <input type="hidden" id="edit-entry-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="edit-entry-description" class="block text-sm font-medium text-gray-700">Nội dung công việc</label>
+                        <textarea id="edit-entry-description" rows="2" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100" readonly></textarea>
+                    </div>
+                     <div>
+                        <label for="edit-entry-hours" class="block text-sm font-medium text-gray-700">Số giờ</label>
+                        <input type="number" id="edit-entry-hours" min="0" step="0.5" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="edit-entry-date" class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+                        <input type="date" id="edit-entry-date" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="edit-entry-end-date" class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+                        <input type="date" id="edit-entry-end-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="edit-entry-start-time" class="block text-sm font-medium text-gray-700">Thời gian bắt đầu</label>
+                        <input type="time" id="edit-entry-start-time" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="edit-entry-end-time" class="block text-sm font-medium text-gray-700">Thời gian kết thúc</label>
+                        <input type="time" id="edit-entry-end-time" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="edit-entry-notes" class="block text-sm font-medium text-gray-700">Ghi chú</label>
+                        <textarea id="edit-entry-notes" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Year Modal -->
     <div id="add-year-modal" class="modal">
         <div class="modal-content max-w-md">
-            <span class="close-button" onclick="closeModal('add-year-modal')">&times;</span>
+            <span class="close-button no-print" onclick="closeModal('add-year-modal')">&times;</span>
             <h3 class="text-xl font-bold mb-4">Thêm Năm học mới</h3>
             <form id="add-year-form">
                 <label for="new-year-input" class="block text-sm font-medium text-gray-700">Năm học (định dạng YYYY-YYYY)</label>
@@ -447,6 +641,117 @@
             </form>
         </div>
     </div>
+
+    <!-- Bulk Delete Tool Modal -->
+    <div id="bulk-delete-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button no-print" onclick="closeModal('bulk-delete-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Công cụ Xóa Giờ lao động Hàng loạt</h3>
+            <div class="p-4 border rounded-lg bg-gray-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="bulk-delete-department" class="block text-sm font-medium text-gray-700">Khoa</label>
+                    <select id="bulk-delete-department" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                </div>
+                <div>
+                    <label for="bulk-delete-year" class="block text-sm font-medium text-gray-700">Năm học</label>
+                    <select id="bulk-delete-year" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="bulk-delete-description" class="block text-sm font-medium text-gray-700">Nội dung công việc (chứa từ khóa)</label>
+                    <input type="text" id="bulk-delete-description" placeholder="Nhập từ khóa trong tên nhiệm vụ hoặc ghi chú" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                 <div>
+                    <label for="bulk-delete-date" class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+                    <input type="date" id="bulk-delete-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="md:col-span-2">
+                    <button id="find-entries-to-delete-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-search mr-2"></i>Tìm kiếm các mục để xóa
+                    </button>
+                </div>
+            </div>
+            <div id="bulk-delete-results-container" class="mt-4 hidden">
+                <h4 class="font-semibold text-gray-800 mb-2">Kết quả tìm kiếm:</h4>
+                <div id="bulk-delete-results-summary" class="p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-800 mb-2"></div>
+                <div id="bulk-delete-results-list" class="max-h-60 overflow-y-auto border rounded-md p-2"></div>
+                <div class="mt-4 flex justify-end">
+                    <button id="confirm-bulk-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Xóa tất cả các mục đã tìm thấy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bulk Edit Tool Modal -->
+    <div id="bulk-edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button no-print" onclick="closeModal('bulk-edit-modal')">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Công cụ Sửa Giờ lao động Hàng loạt</h3>
+            <!-- Search Section -->
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <h4 class="font-semibold text-lg mb-2">1. Tìm kiếm các mục cần sửa</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="bulk-edit-department" class="block text-sm font-medium text-gray-700">Khoa</label>
+                        <select id="bulk-edit-department" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                    </div>
+                    <div>
+                        <label for="bulk-edit-year" class="block text-sm font-medium text-gray-700">Năm học</label>
+                        <select id="bulk-edit-year" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="bulk-edit-description" class="block text-sm font-medium text-gray-700">Nội dung công việc (chứa từ khóa)</label>
+                        <input type="text" id="bulk-edit-description" placeholder="Nhập từ khóa trong tên nhiệm vụ hoặc ghi chú" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="bulk-edit-date" class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+                        <input type="date" id="bulk-edit-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button id="find-entries-to-edit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                            <i class="fas fa-search mr-2"></i>Tìm kiếm các mục để sửa
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Results and Edit Section -->
+            <div id="bulk-edit-results-container" class="mt-4 hidden">
+                <h4 class="font-semibold text-lg mb-2">2. Kết quả & Các thay đổi cần áp dụng</h4>
+                <div id="bulk-edit-results-summary" class="p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-800 mb-2"></div>
+                
+                <!-- NEW: Detailed results list -->
+                <div id="bulk-edit-results-list" class="max-h-60 overflow-y-auto border rounded-md p-2 mt-2"></div>
+
+                <div class="p-4 border rounded-lg bg-gray-50 mt-4">
+                    <p class="text-sm text-gray-600 mb-2">Điền thông tin vào các trường bạn muốn thay đổi. Bỏ trống các trường không muốn thay đổi.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="bulk-edit-new-date" class="block text-sm font-medium text-gray-700">Ngày bắt đầu MỚI</label>
+                            <input type="date" id="bulk-edit-new-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="bulk-edit-new-end-date" class="block text-sm font-medium text-gray-700">Ngày kết thúc MỚI</label>
+                            <input type="date" id="bulk-edit-new-end-date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="bulk-edit-new-notes" class="block text-sm font-medium text-gray-700">Ghi chú MỚI</label>
+                            <textarea id="bulk-edit-new-notes" rows="2" placeholder="Nội dung ghi chú mới sẽ thay thế hoàn toàn ghi chú cũ." class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button id="confirm-bulk-edit-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>Áp dụng thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Alert & Confirm Modals -->
     <div id="alert-modal" class="modal">
         <div class="modal-content max-w-sm">
              <h3 id="alert-title" class="text-lg font-bold mb-4">Thông báo</h3>
@@ -524,6 +829,12 @@
             customYears: [],
             selectedDepartmentId: null,
             selectedYear: null,
+            currentLecturerIdForDetails: null, // To keep track of whose details are open
+            foundEntriesToDelete: [], // For the bulk delete tool
+            foundEntriesToEdit: [], // For the bulk edit tool
+            statsEntries: [], // For the statistics tool
+            statsSelectedLecturer: null, // For the statistics tool
+            statsSelectedYear: null, // For the statistics tool
         };
         
         // Firebase variables
@@ -574,6 +885,7 @@
 
         // --- Date & Year Logic ---
         function getAcademicYear(date) {
+            if (!date) return null;
             const d = new Date(date);
             const year = d.getFullYear();
             const month = d.getMonth(); // 0-11
@@ -586,6 +898,13 @@
 
         function getCurrentAcademicYear() {
             return getAcademicYear(new Date());
+        }
+
+        function getYearsForSelect() {
+            const yearsFromEntries = new Set(state.entries.map(e => e.academicYear || getAcademicYear(e.date)).filter(y => y));
+            const customYearsSet = new Set(state.customYears);
+            const allYears = new Set([ ...yearsFromEntries, ...customYearsSet, getCurrentAcademicYear() ]);
+            return Array.from(allYears).sort().reverse();
         }
 
         // --- UI Rendering ---
@@ -602,7 +921,7 @@
             if (!state.currentUser) return;
             const isAdmin = state.currentUser.role === 'admin';
             document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = isAdmin ? 'inline-flex' : 'none';
+                el.style.display = isAdmin ? 'inline-block' : 'none'; // Use inline-block for dropdown
             });
 
             const roleBadge = document.getElementById('user-role-badge');
@@ -630,10 +949,7 @@
 
         function renderYearSelect() {
             const select = document.getElementById('year-select');
-            const yearsFromEntries = new Set(state.entries.map(e => getAcademicYear(e.date)));
-            const customYearsSet = new Set(state.customYears);
-            const allYears = new Set([ ...yearsFromEntries, ...customYearsSet, getCurrentAcademicYear() ]);
-            const sortedYears = Array.from(allYears).sort().reverse();
+            const sortedYears = getYearsForSelect();
             select.innerHTML = '';
             sortedYears.forEach(year => {
                 const option = document.createElement('option');
@@ -662,7 +978,7 @@
             }
             filteredLecturers.forEach((lecturer, index) => {
                 const totalHours = state.entries
-                    .filter(e => e.lecturerId === lecturer.id && getAcademicYear(e.date) === state.selectedYear)
+                    .filter(e => e.lecturerId === lecturer.id && (e.academicYear ? e.academicYear === state.selectedYear : getAcademicYear(e.date) === state.selectedYear))
                     .reduce((sum, e) => sum + e.hours, 0);
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -778,6 +1094,17 @@
             if (state.selectedDepartmentId && state.selectedDepartmentId !== 'all') {
                  modalDepSelect.value = state.selectedDepartmentId;
             }
+            
+            const modalYearSelect = document.getElementById('bulk-add-year-select');
+            modalYearSelect.innerHTML = '';
+            getYearsForSelect().forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `Năm học ${year}`;
+                modalYearSelect.appendChild(option);
+            });
+            modalYearSelect.value = state.selectedYear;
+
             renderLecturerChecklistInModal(modalDepSelect.value);
 
             const taskSelect = document.getElementById('task-select');
@@ -792,6 +1119,14 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('entry-date').value = today;
             document.getElementById('custom-entry-date').value = today;
+            document.getElementById('end-date').value = '';
+            document.getElementById('custom-end-date').value = '';
+            document.getElementById('start-time').value = '';
+            document.getElementById('end-time').value = '';
+            document.getElementById('custom-start-time').value = '';
+            document.getElementById('custom-end-time').value = '';
+            document.getElementById('predefined-notes').value = '';
+            document.getElementById('custom-notes').value = '';
             
             updateCalculatedHours();
         }
@@ -847,27 +1182,133 @@
             });
         }
 
+        function renderResultsList(listDiv, entries) {
+            listDiv.innerHTML = '';
+            if (entries.length > 0) {
+                const list = document.createElement('ul');
+                list.className = 'divide-y divide-gray-200';
+                entries.forEach(entry => {
+                    const lecturer = state.lecturers.find(l => l.id === entry.lecturerId);
+                    const item = document.createElement('li');
+                    item.className = 'py-2 text-sm';
+                    item.innerHTML = `<b>${lecturer ? lecturer.name : 'N/A'}</b>: ${entry.description} (${new Date(entry.date).toLocaleDateString('vi-VN')}) - <i>${entry.hours} giờ</i>`;
+                    list.appendChild(item);
+                });
+                listDiv.appendChild(list);
+            }
+        }
+        
+        function generateAndPrintFullReport() {
+            const lecturer = state.statsSelectedLecturer;
+            const department = state.departments.find(d => d.id === lecturer.departmentId);
+            const entries = state.statsEntries;
+            const year = state.statsSelectedYear;
+
+            if (!lecturer || !department || !entries || !year) {
+                showAlert("Không đủ thông tin để tạo báo cáo.");
+                return;
+            }
+            
+            const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
+            const printArea = document.getElementById('print-report-area');
+
+            const reportHtml = `
+                <div style="font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0 auto; max-width: 800px;">
+                    <div style="display: flex; justify-content: space-between; text-align: center;">
+                        <div>
+                            <p style="text-transform: uppercase;">TRƯỜNG ĐẠI HỌC HẢI PHÒNG</p>
+                            <p style="text-transform: uppercase; font-weight: bold;">${department.name}</p>
+                            <hr style="width: 50%; margin: 4px auto; border-top: 1px solid black;">
+                        </div>
+                        <div>
+                            <p style="font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                            <p style="font-weight: bold;">Độc lập - Tự do - Hạnh phúc</p>
+                            <hr style="width: 50%; margin: 4px auto; border-top: 1px solid black;">
+                        </div>
+                    </div>
+
+                    <h2 style="text-align: center; font-weight: bold; font-size: 16pt; margin-top: 40px; margin-bottom: 20px;">
+                        BẢNG TỔNG HỢP GIỜ LAO ĐỘNG KHÁC<br>
+                        NĂM HỌC ${year}
+                    </h2>
+
+                    <p style="font-size: 14pt; margin-bottom: 15px;">
+                        Họ và tên giảng viên: <span style="font-weight: bold;">${lecturer.name}</span>
+                    </p>
+                    <p style="font-size: 14pt; margin-bottom: 15px;">
+                        Mã giảng viên: <span style="font-weight: bold;">${lecturer.code}</span>
+                    </p>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 13pt;">
+                        <thead style="font-weight: bold; text-align: center;">
+                            <tr>
+                                <th style="border: 1px solid black; padding: 8px; width: 5%;">STT</th>
+                                <th style="border: 1px solid black; padding: 8px; width: 45%;">Nội dung công việc</th>
+                                <th style="border: 1px solid black; padding: 8px; width: 20%;">Thời gian thực hiện</th>
+                                <th style="border: 1px solid black; padding: 8px; width: 10%;">Số giờ</th>
+                                <th style="border: 1px solid black; padding: 8px;">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${entries.map((entry, index) => `
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 8px; text-align: center;">${index + 1}</td>
+                                    <td style="border: 1px solid black; padding: 8px;">${entry.description}</td>
+                                    <td style="border: 1px solid black; padding: 8px; text-align: center;">${new Date(entry.date).toLocaleDateString('vi-VN')}</td>
+                                    <td style="border: 1px solid black; padding: 8px; text-align: center;">${entry.hours}</td>
+                                    <td style="border: 1px solid black; padding: 8px;">${entry.notes || ''}</td>
+                                </tr>
+                            `).join('')}
+                            <tr>
+                                <td colspan="3" style="border: 1px solid black; padding: 8px; text-align: right; font-weight: bold;">Tổng cộng</td>
+                                <td style="border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;">${totalHours}</td>
+                                <td style="border: 1px solid black; padding: 8px;"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="display: flex; justify-content: flex-end; margin-top: 30px;">
+                        <div style="text-align: center;">
+                            <p>Hải Phòng, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}</p>
+                            <p style="font-weight: bold; margin-top: 15px;">Người lập biểu</p>
+                            <p style="font-style: italic; margin-top: 5px;">(Ký và ghi rõ họ tên)</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            printArea.innerHTML = reportHtml;
+            
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+
         // --- Global Functions (for inline onclick) ---
         window.openModal = (modalId) => document.getElementById(modalId).style.display = 'block';
-        window.closeModal = (modalId) => document.getElementById(modalId).style.display = 'none';
+        window.closeModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
         window.onclick = (event) => {
-            if (event.target.classList.contains('modal')) event.target.style.display = "none";
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
         };
         
         window.switchTab = (tabName) => {
             const predefinedForm = document.getElementById('predefined-task-form');
             const customForm = document.getElementById('custom-task-form');
-            const predefinedInputs = predefinedForm.querySelectorAll('select, input');
+            const predefinedInputs = predefinedForm.querySelectorAll('select, input, textarea');
             const customInputs = customForm.querySelectorAll('textarea, input');
 
             if (tabName === 'predefined') {
-                predefinedForm.style.display = 'block';
+                predefinedForm.style.display = 'grid';
                 customForm.style.display = 'none';
                 predefinedInputs.forEach(input => input.disabled = false);
                 customInputs.forEach(input => input.disabled = true);
             } else {
                 predefinedForm.style.display = 'none';
-                customForm.style.display = 'block';
+                customForm.style.display = 'grid';
                 predefinedInputs.forEach(input => input.disabled = true);
                 customInputs.forEach(input => input.disabled = false);
             }
@@ -877,31 +1318,65 @@
         };
 
         window.showDetails = (lecturerId) => {
+            state.currentLecturerIdForDetails = lecturerId;
             const lecturer = state.lecturers.find(l => l.id === lecturerId);
             const lecturerEntries = state.entries
-                .filter(e => e.lecturerId === lecturerId && getAcademicYear(e.date) === state.selectedYear)
+                .filter(e => e.lecturerId === lecturerId && (e.academicYear ? e.academicYear === state.selectedYear : getAcademicYear(e.date) === state.selectedYear))
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
             document.getElementById('details-title').textContent = `Chi tiết giờ LĐ (${state.selectedYear}) - ${lecturer.name}`;
             const contentDiv = document.getElementById('details-content');
             contentDiv.innerHTML = '';
+            
+            const detailsControls = document.getElementById('details-controls');
+            if (lecturerEntries.length > 0 && state.currentUser.role === 'admin') {
+                detailsControls.style.display = 'flex';
+            } else {
+                detailsControls.style.display = 'none';
+            }
+            document.getElementById('select-all-entries').checked = false;
+
             if (lecturerEntries.length === 0) {
-                contentDiv.innerHTML = '<p class="text-gray-500">Chưa có giờ lao động nào được ghi nhận trong năm học này.</p>';
+                contentDiv.innerHTML = '<p class="text-gray-500 p-4">Chưa có giờ lao động nào được ghi nhận trong năm học này.</p>';
             } else {
                 const list = document.createElement('ul');
                 list.className = 'divide-y divide-gray-200';
                 lecturerEntries.forEach(entry => {
                     const item = document.createElement('li');
-                    item.className = 'py-3 flex justify-between items-center';
-                    const deleteButtonHtml = state.currentUser.role === 'admin' ? 
-                        `<button class="text-xs text-red-500 hover:text-red-700 mt-1" onclick="deleteEntry('${entry.id}')">Xóa</button>` : '';
+                    item.className = 'py-3 px-2 flex items-center gap-3';
+                    
+                    const controlsHtml = state.currentUser.role === 'admin' ? 
+                        `<div class="flex items-center gap-2">
+                            <input type="checkbox" data-entry-id="${entry.id}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 entry-checkbox">
+                            <button onclick="openEditEntryModal('${entry.id}')" class="text-blue-500 hover:text-blue-700" title="Sửa mục này"><i class="fas fa-edit"></i></button>
+                         </div>` : '';
+
+                    let dateInfo = new Date(entry.date).toLocaleDateString('vi-VN');
+                    if (entry.endDate && entry.endDate !== entry.date) {
+                        dateInfo = `Từ ${dateInfo} đến ${new Date(entry.endDate).toLocaleDateString('vi-VN')}`;
+                    }
+
+                    let timeInfo = '';
+                    if (entry.startTime && entry.endTime) {
+                        timeInfo = ` - Từ ${entry.startTime} đến ${entry.endTime}`;
+                    } else if (entry.startTime) {
+                        timeInfo = ` - Bắt đầu lúc ${entry.startTime}`;
+                    }
+                    
+                    let notesInfo = '';
+                    if (entry.notes) {
+                        notesInfo = `<p class="text-sm text-gray-600 italic mt-1 pl-2 border-l-2 border-gray-300">Ghi chú: ${entry.notes}</p>`;
+                    }
+
                     item.innerHTML = `
-                        <div>
+                        ${controlsHtml}
+                        <div class="flex-grow">
                             <p class="text-sm font-medium text-gray-800">${entry.description}</p>
-                            <p class="text-sm text-gray-500">${new Date(entry.date).toLocaleDateString('vi-VN')}</p>
+                            <p class="text-sm text-gray-500">${dateInfo}${timeInfo}</p>
+                            ${notesInfo}
                         </div>
                         <div class="text-right">
                             <p class="text-md font-bold text-green-600">${entry.hours} giờ</p>
-                            ${deleteButtonHtml}
                         </div>
                     `;
                     list.appendChild(item);
@@ -910,11 +1385,37 @@
             }
             openModal('details-modal');
         };
-        window.deleteEntry = async (entryId) => {
-            showConfirm('Bạn có chắc muốn xóa mục này?', async () => {
-                await deleteDoc(doc(entriesCol, entryId));
-            });
+
+        window.openEditEntryModal = (entryId) => {
+            const entry = state.entries.find(e => e.id === entryId);
+            if (!entry) {
+                showAlert("Không tìm thấy mục cần sửa.");
+                return;
+            }
+
+            document.getElementById('edit-entry-id').value = entry.id;
+            document.getElementById('edit-entry-description').value = entry.description;
+            document.getElementById('edit-entry-hours').value = entry.hours;
+            document.getElementById('edit-entry-date').value = entry.date;
+            document.getElementById('edit-entry-end-date').value = entry.endDate || '';
+            document.getElementById('edit-entry-start-time').value = entry.startTime || '';
+            document.getElementById('edit-entry-end-time').value = entry.endTime || '';
+            document.getElementById('edit-entry-notes').value = entry.notes || '';
+            
+            // Prevent editing description of non-custom tasks
+            const descTextarea = document.getElementById('edit-entry-description');
+            if (entry.description.startsWith('Nhiệm vụ khác:')) {
+                descTextarea.readOnly = false;
+                descTextarea.classList.remove('bg-gray-100');
+            } else {
+                descTextarea.readOnly = true;
+                descTextarea.classList.add('bg-gray-100');
+            }
+
+
+            openModal('edit-entry-modal');
         };
+        
         window.editDepartment = (id) => {
             const dep = state.departments.find(d => d.id === id);
             document.getElementById('department-id').value = dep.id;
@@ -1000,7 +1501,7 @@
         // --- Firebase Initialization and Auth State ---
         let dataListenersAttached = false;
         function setupOnSnapshotListeners() {
-            if (dataListenersAttached) return; // Prevent attaching multiple listeners
+            if (dataListenersAttached) return; 
             dataListenersAttached = true;
             onSnapshot(departmentsCol, (snapshot) => {
                 state.departments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -1012,7 +1513,10 @@
             });
             onSnapshot(entriesCol, (snapshot) => {
                 state.entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                render();
+                if (document.getElementById('details-modal').style.display === 'block' && state.currentLecturerIdForDetails) {
+                    showDetails(state.currentLecturerIdForDetails);
+                }
+                renderLecturerTable(); 
             });
             onSnapshot(tasksCol, (snapshot) => {
                 if (snapshot.empty && state.currentUser.role === 'admin') {
@@ -1068,7 +1572,6 @@
                         let userDoc = await getDoc(userDocRef);
 
                         if (!userDoc.exists()) {
-                            // Check if this is the first user ever
                             const allUsersSnapshot = await getDocs(usersCol);
                             const isFirstUser = allUsersSnapshot.empty;
                             const newUserRole = isFirstUser ? 'admin' : 'viewer';
@@ -1078,7 +1581,7 @@
                                 role: newUserRole,
                                 createdAt: new Date()
                             });
-                            userDoc = await getDoc(userDocRef); // Re-fetch the doc
+                            userDoc = await getDoc(userDocRef);
                         }
 
                         state.currentUser = { uid: user.uid, ...userDoc.data() };
@@ -1089,17 +1592,13 @@
 
                         updateUIForRole();
                         setupOnSnapshotListeners();
-
-                        // Start the inactivity timer
                         resetInactivityTimer();
                         setupInactivityListeners();
                     } else {
                         state.currentUser = null;
                         loginPage.classList.remove('hidden');
                         appContent.classList.add('hidden');
-                        dataListenersAttached = false; // Reset for next login
-
-                        // Stop the inactivity timer
+                        dataListenersAttached = false; 
                         clearInactivityListeners();
                     }
                 });
@@ -1175,17 +1674,12 @@
                 if (!user) return;
 
                 try {
-                    // Re-authenticate user before changing password
                     const credential = EmailAuthProvider.credential(user.email, currentPassword);
                     await reauthenticateWithCredential(user, credential);
-                    
-                    // If re-authentication is successful, update the password
                     await updatePassword(user, newPassword);
-                    
                     showAlert('Đổi mật khẩu thành công!', true);
                     closeModal('change-password-modal');
                     e.target.reset();
-
                 } catch (error) {
                     console.error("Password change error:", error);
                     if (error.code === 'auth/wrong-password') {
@@ -1203,9 +1697,9 @@
             });
             
             document.getElementById('users-list-body').addEventListener('click', async (e) => {
-                const target = e.target;
+                const target = e.target.closest('button'); // Handle clicks on icons inside buttons
+                if (!target) return;
 
-                // Save Role Change
                 if (target.classList.contains('save-role-btn')) {
                     const uid = target.dataset.uid;
                     const selectEl = document.querySelector(`.role-select[data-uid="${uid}"]`);
@@ -1217,8 +1711,6 @@
                         showAlert(`Lỗi cập nhật vai trò: ${error.message}`);
                     }
                 }
-
-                // Reset Password
                 if (target.classList.contains('reset-password-btn')) {
                     const email = target.dataset.email;
                     showConfirm(`Bạn có chắc muốn gửi email reset mật khẩu cho ${email}?`, async () => {
@@ -1230,18 +1722,13 @@
                         }
                     });
                 }
-
-                // Delete User
                 if (target.classList.contains('delete-user-btn')) {
                     const uid = target.dataset.uid;
                     showConfirm('Bạn có chắc muốn xóa người dùng này? Hành động này chỉ xóa thông tin khỏi danh sách, không xóa tài khoản đăng nhập vĩnh viễn.', async () => {
                         try {
-                            // NOTE: This only deletes the user's record from Firestore.
-                            // To delete the user from Firebase Authentication, you need to use the Firebase Admin SDK in a backend environment (like a Cloud Function).
-                            // This is a security measure of Firebase.
                             await deleteDoc(doc(usersCol, uid));
                             showAlert('Đã xóa người dùng khỏi danh sách.', true);
-                            renderUsersList(); // Refresh the list
+                            renderUsersList();
                         } catch (error) {
                             showAlert(`Lỗi xóa người dùng: ${error.message}`);
                         }
@@ -1250,7 +1737,7 @@
             });
 
 
-            // Department select
+            // Department & Year select
             document.getElementById('department-select').addEventListener('change', (e) => {
                 state.selectedDepartmentId = e.target.value;
                 renderLecturerTable();
@@ -1272,6 +1759,32 @@
                 input.placeholder = `${currentYear}-${currentYear + 1}`;
                 openModal('add-year-modal');
             });
+            
+            // Details Modal Actions
+            document.getElementById('select-all-entries').addEventListener('change', (e) => {
+                document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
+                });
+            });
+
+            document.getElementById('delete-selected-entries-btn').addEventListener('click', async () => {
+                const selectedIds = Array.from(document.querySelectorAll('.entry-checkbox:checked'))
+                                         .map(cb => cb.dataset.entryId);
+                if (selectedIds.length === 0) {
+                    showAlert('Vui lòng chọn ít nhất một mục để xóa.');
+                    return;
+                }
+
+                showConfirm(`Bạn có chắc muốn xóa ${selectedIds.length} mục đã chọn?`, async () => {
+                    const batch = writeBatch(db);
+                    selectedIds.forEach(id => {
+                        batch.delete(doc(entriesCol, id));
+                    });
+                    await batch.commit();
+                    showAlert('Đã xóa các mục đã chọn thành công!', true);
+                });
+            });
+
 
             document.getElementById('add-entry-btn').addEventListener('click', () => {
                 if (state.departments.length === 0) {
@@ -1312,8 +1825,9 @@
                     return;
                 }
 
+                const academicYear = document.getElementById('bulk-add-year-select').value;
                 const activeTab = document.querySelector('.tab-button.active').id;
-                let description, hours, date;
+                let description, hours, date, endDate, startTime, endTime, notes;
 
                 try {
                     if (activeTab === 'tab-predefined') {
@@ -1321,6 +1835,10 @@
                         const quantity = parseInt(document.getElementById('task-quantity').value, 10);
                         const task = state.tasks.find(t => t.id === taskId);
                         date = document.getElementById('entry-date').value;
+                        endDate = document.getElementById('end-date').value || null;
+                        startTime = document.getElementById('start-time').value || null;
+                        endTime = document.getElementById('end-time').value || null;
+                        notes = document.getElementById('predefined-notes').value.trim();
 
                         if (!task || !date || isNaN(quantity) || quantity <= 0) {
                             showAlert('Vui lòng điền đầy đủ thông tin cho nhiệm vụ có sẵn.');
@@ -1329,21 +1847,24 @@
                         description = task.name;
                         hours = task.hours * quantity;
                     } else {
-                        const customDesc = document.getElementById('custom-task-description').value.trim();
+                        description = `Nhiệm vụ khác: ${document.getElementById('custom-task-description').value.trim()}`;
                         hours = parseFloat(document.getElementById('custom-task-hours').value);
                         date = document.getElementById('custom-entry-date').value;
+                        endDate = document.getElementById('custom-end-date').value || null;
+                        startTime = document.getElementById('custom-start-time').value || null;
+                        endTime = document.getElementById('custom-end-time').value || null;
+                        notes = document.getElementById('custom-notes').value.trim();
 
-                        if (!customDesc || !date || isNaN(hours) || hours <= 0) {
+                        if (!description || !date || isNaN(hours) || hours <= 0) {
                             showAlert('Vui lòng điền đầy đủ và hợp lệ các thông tin cho nhiệm vụ khác.');
                             return;
                         }
-                        description = `Nhiệm vụ khác: ${customDesc}`;
                     }
 
                     const batch = writeBatch(db);
                     selectedLecturerIds.forEach(lecturerId => {
                         const newEntryRef = doc(entriesCol);
-                        batch.set(newEntryRef, { lecturerId, description, hours, date });
+                        batch.set(newEntryRef, { lecturerId, description, hours, date, endDate, startTime, endTime, notes, academicYear });
                     });
 
                     await batch.commit();
@@ -1356,6 +1877,275 @@
                 }
             });
 
+            // Edit Entry Form
+            document.getElementById('edit-entry-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const entryId = document.getElementById('edit-entry-id').value;
+                const updatedData = {
+                    description: document.getElementById('edit-entry-description').value,
+                    hours: parseFloat(document.getElementById('edit-entry-hours').value),
+                    date: document.getElementById('edit-entry-date').value,
+                    endDate: document.getElementById('edit-entry-end-date').value || null,
+                    startTime: document.getElementById('edit-entry-start-time').value || null,
+                    endTime: document.getElementById('edit-entry-end-time').value || null,
+                    notes: document.getElementById('edit-entry-notes').value.trim(),
+                };
+                
+                updatedData.academicYear = getAcademicYear(updatedData.date);
+
+                if (isNaN(updatedData.hours) || !updatedData.date) {
+                    showAlert('Vui lòng điền đầy đủ các trường bắt buộc (Số giờ, Ngày bắt đầu).');
+                    return;
+                }
+
+                try {
+                    await updateDoc(doc(entriesCol, entryId), updatedData);
+                    showAlert('Cập nhật thành công!', true);
+                    closeModal('edit-entry-modal');
+                } catch (error) {
+                    showAlert(`Lỗi cập nhật: ${error.message}`);
+                    console.error("Error updating entry:", error);
+                }
+            });
+
+            // Common search logic for bulk tools
+            function findEntriesForBulkAction(depId, year, descriptionText, date) {
+                 if (!depId && !year && !descriptionText && !date) { 
+                    showAlert('Vui lòng nhập ít nhất một tiêu chí tìm kiếm.'); 
+                    return [];
+                }
+                let lecturerIdsInDep = [];
+                if (depId && depId !== 'all') {
+                    lecturerIdsInDep = state.lecturers.filter(l => l.departmentId === depId).map(l => l.id);
+                    if (lecturerIdsInDep.length === 0) { 
+                        showAlert('Khoa được chọn không có giảng viên nào.'); 
+                        return [];
+                    }
+                }
+                return state.entries.filter(entry => {
+                    if (depId && depId !== 'all' && !lecturerIdsInDep.includes(entry.lecturerId)) return false;
+                    if (year && year !== 'all') {
+                        const entryYear = entry.academicYear || getAcademicYear(entry.date);
+                        if (entryYear !== year) return false;
+                    }
+                    if (date && entry.date !== date) return false;
+                    if (descriptionText) {
+                        const entryDesc = entry.description.toLowerCase();
+                        const entryNotes = (entry.notes || '').toLowerCase();
+                        if (!entryDesc.includes(descriptionText) && !entryNotes.includes(descriptionText)) return false;
+                    }
+                    return true;
+                });
+            }
+
+            // Bulk Delete Tool Logic
+            document.getElementById('bulk-delete-tool-btn').addEventListener('click', () => {
+                const depSelect = document.getElementById('bulk-delete-department');
+                depSelect.innerHTML = '<option value="all">-- Tất cả các Khoa --</option>';
+                state.departments.forEach(dep => { depSelect.innerHTML += `<option value="${dep.id}">${dep.name}</option>`; });
+                const yearSelect = document.getElementById('bulk-delete-year');
+                yearSelect.innerHTML = '<option value="all">-- Tất cả các Năm học --</option>';
+                getYearsForSelect().forEach(year => { yearSelect.innerHTML += `<option value="${year}">${year}</option>`; });
+                document.getElementById('bulk-delete-description').value = '';
+                document.getElementById('bulk-delete-date').value = '';
+                document.getElementById('bulk-delete-results-container').classList.add('hidden');
+                state.foundEntriesToDelete = [];
+                openModal('bulk-delete-modal');
+            });
+
+            document.getElementById('find-entries-to-delete-btn').addEventListener('click', async () => {
+                const depId = document.getElementById('bulk-delete-department').value;
+                const year = document.getElementById('bulk-delete-year').value;
+                const descriptionText = document.getElementById('bulk-delete-description').value.trim().toLowerCase();
+                const date = document.getElementById('bulk-delete-date').value;
+                
+                const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
+                state.foundEntriesToDelete = filteredEntries;
+
+                const resultsContainer = document.getElementById('bulk-delete-results-container');
+                const summaryDiv = document.getElementById('bulk-delete-results-summary');
+                const listDiv = document.getElementById('bulk-delete-results-list');
+                
+                summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp.`;
+                renderResultsList(listDiv, filteredEntries);
+
+                if (filteredEntries.length > 0) {
+                    resultsContainer.classList.remove('hidden');
+                } else {
+                    resultsContainer.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('confirm-bulk-delete-btn').addEventListener('click', async () => {
+                if (state.foundEntriesToDelete.length === 0) { showAlert('Không có mục nào để xóa.'); return; }
+                showConfirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ${state.foundEntriesToDelete.length} mục đã tìm thấy? Hành động này KHÔNG THỂ hoàn tác.`, async () => {
+                    const batch = writeBatch(db);
+                    state.foundEntriesToDelete.forEach(entry => { batch.delete(doc(entriesCol, entry.id)); });
+                    await batch.commit();
+                    showAlert('Xóa hàng loạt thành công!', true);
+                    closeModal('bulk-delete-modal');
+                });
+            });
+            
+            // Bulk Edit Tool Logic
+            document.getElementById('bulk-edit-tool-btn').addEventListener('click', () => {
+                const depSelect = document.getElementById('bulk-edit-department');
+                depSelect.innerHTML = '<option value="all">-- Tất cả các Khoa --</option>';
+                state.departments.forEach(dep => { depSelect.innerHTML += `<option value="${dep.id}">${dep.name}</option>`; });
+                const yearSelect = document.getElementById('bulk-edit-year');
+                yearSelect.innerHTML = '<option value="all">-- Tất cả các Năm học --</option>';
+                getYearsForSelect().forEach(year => { yearSelect.innerHTML += `<option value="${year}">${year}</option>`; });
+                document.getElementById('bulk-edit-description').value = '';
+                document.getElementById('bulk-edit-date').value = '';
+                document.getElementById('bulk-edit-results-container').classList.add('hidden');
+                document.getElementById('bulk-edit-new-date').value = '';
+                document.getElementById('bulk-edit-new-end-date').value = '';
+                document.getElementById('bulk-edit-new-notes').value = '';
+                state.foundEntriesToEdit = [];
+                openModal('bulk-edit-modal');
+            });
+
+            document.getElementById('find-entries-to-edit-btn').addEventListener('click', () => {
+                const depId = document.getElementById('bulk-edit-department').value;
+                const year = document.getElementById('bulk-edit-year').value;
+                const descriptionText = document.getElementById('bulk-edit-description').value.trim().toLowerCase();
+                const date = document.getElementById('bulk-edit-date').value;
+                
+                const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
+                state.foundEntriesToEdit = filteredEntries;
+
+                const resultsContainer = document.getElementById('bulk-edit-results-container');
+                const summaryDiv = document.getElementById('bulk-edit-results-summary');
+                const listDiv = document.getElementById('bulk-edit-results-list');
+                
+                summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp. Vui lòng nhập các thay đổi bên dưới.`;
+                renderResultsList(listDiv, filteredEntries);
+
+                if (filteredEntries.length > 0) {
+                    resultsContainer.classList.remove('hidden');
+                } else {
+                    resultsContainer.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('confirm-bulk-edit-btn').addEventListener('click', async () => {
+                if (state.foundEntriesToEdit.length === 0) { showAlert('Không có mục nào để sửa.'); return; }
+                
+                const newDate = document.getElementById('bulk-edit-new-date').value;
+                const newEndDate = document.getElementById('bulk-edit-new-end-date').value;
+                const newNotes = document.getElementById('bulk-edit-new-notes').value;
+
+                const updateData = {};
+                if (newDate) updateData.date = newDate;
+                if (newEndDate) updateData.endDate = newEndDate;
+                // Allow setting notes to empty string
+                if (document.getElementById('bulk-edit-new-notes').value !== '') {
+                    updateData.notes = newNotes;
+                }
+
+                if (Object.keys(updateData).length === 0) {
+                    showAlert('Bạn chưa nhập thông tin nào để thay đổi.');
+                    return;
+                }
+
+                showConfirm(`Bạn có chắc muốn áp dụng các thay đổi này cho ${state.foundEntriesToEdit.length} mục đã tìm thấy?`, async () => {
+                    const batch = writeBatch(db);
+                    state.foundEntriesToEdit.forEach(entry => {
+                        batch.update(doc(entriesCol, entry.id), updateData);
+                    });
+                    await batch.commit();
+                    showAlert('Sửa hàng loạt thành công!', true);
+                    closeModal('bulk-edit-modal');
+                });
+            });
+
+            // Statistics Tool Logic
+            document.getElementById('statistics-tool-btn').addEventListener('click', () => {
+                const depSelect = document.getElementById('stats-department-select');
+                depSelect.innerHTML = '<option value="">-- Chọn Khoa --</option>';
+                state.departments.forEach(dep => { depSelect.innerHTML += `<option value="${dep.id}">${dep.name}</option>`; });
+                
+                const yearSelect = document.getElementById('stats-year-select');
+                yearSelect.innerHTML = '<option value="">-- Chọn Năm học --</option>';
+                getYearsForSelect().forEach(year => { yearSelect.innerHTML += `<option value="${year}">${year}</option>`; });
+                
+                document.getElementById('stats-lecturer-select').innerHTML = '<option value="">-- Chọn Giảng viên --</option>';
+                document.getElementById('statistics-results-container').classList.add('hidden');
+                openModal('statistics-modal');
+            });
+
+            document.getElementById('stats-department-select').addEventListener('change', (e) => {
+                const depId = e.target.value;
+                const lecturerSelect = document.getElementById('stats-lecturer-select');
+                lecturerSelect.innerHTML = '<option value="">-- Chọn Giảng viên --</option>';
+                if (depId) {
+                    state.lecturers
+                        .filter(l => l.departmentId === depId)
+                        .forEach(l => {
+                            lecturerSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
+                        });
+                }
+            });
+
+            document.getElementById('view-statistics-btn').addEventListener('click', () => {
+                const lecturerId = document.getElementById('stats-lecturer-select').value;
+                const year = document.getElementById('stats-year-select').value;
+
+                if (!lecturerId || !year) {
+                    showAlert("Vui lòng chọn đầy đủ Khoa, Năm học và Giảng viên.");
+                    return;
+                }
+
+                state.statsSelectedLecturer = state.lecturers.find(l => l.id === lecturerId);
+                state.statsSelectedYear = year;
+                state.statsEntries = state.entries
+                    .filter(e => e.lecturerId === lecturerId && (e.academicYear ? e.academicYear === year : getAcademicYear(e.date) === year))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                const resultsContainer = document.getElementById('statistics-results-container');
+                const resultsTable = document.getElementById('statistics-results-table');
+                const resultsTitle = document.getElementById('statistics-results-title');
+
+                resultsTitle.textContent = `Kết quả thống kê cho ${state.statsSelectedLecturer.name} - Năm học ${year}`;
+                
+                if (state.statsEntries.length === 0) {
+                    resultsTable.innerHTML = '<p class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu.</p>';
+                } else {
+                    const totalHours = state.statsEntries.reduce((sum, e) => sum + e.hours, 0);
+                    resultsTable.innerHTML = `
+                        <table class="min-w-full bg-white">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase">STT</th>
+                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase">Nội dung</th>
+                                    <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase">Ngày</th>
+                                    <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase">Giờ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${state.statsEntries.map((entry, index) => `
+                                    <tr>
+                                        <td class="px-4 py-2 text-center">${index + 1}</td>
+                                        <td class="px-4 py-2">${entry.description}</td>
+                                        <td class="px-4 py-2 text-center">${new Date(entry.date).toLocaleDateString('vi-VN')}</td>
+                                        <td class="px-4 py-2 text-center font-semibold">${entry.hours}</td>
+                                    </tr>
+                                `).join('')}
+                                <tr>
+                                    <td colspan="3" class="px-4 py-2 text-right font-bold">TỔNG CỘNG</td>
+                                    <td class="px-4 py-2 text-center font-bold text-red-600">${totalHours}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                }
+                resultsContainer.classList.remove('hidden');
+            });
+
+            document.getElementById('print-report-btn').addEventListener('click', generateAndPrintFullReport);
+
+
+            // Other forms
             document.getElementById('department-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('department-id').value;
