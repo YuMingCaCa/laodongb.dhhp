@@ -873,15 +873,37 @@
             document.getElementById('confirm-message').textContent = message;
             const yesBtn = document.getElementById('confirm-btn-yes');
             const noBtn = document.getElementById('confirm-btn-no');
+            
+            const newYesBtn = yesBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+
             const close = () => modal.style.display = 'none';
             const confirmAndClose = () => {
                 onConfirm();
                 close();
             };
-            yesBtn.onclick = confirmAndClose;
+            newYesBtn.onclick = confirmAndClose;
             noBtn.onclick = close;
             modal.style.display = 'block';
         }
+
+        function setButtonLoading(button, isLoading) {
+            if (!button) return;
+            if (isLoading) {
+                button.disabled = true;
+                if (!button.dataset.originalHtml) {
+                    button.dataset.originalHtml = button.innerHTML;
+                }
+                button.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Đang xử lý...`;
+            } else {
+                button.disabled = false;
+                if (button.dataset.originalHtml) {
+                    button.innerHTML = button.dataset.originalHtml;
+                    delete button.dataset.originalHtml;
+                }
+            }
+        }
+
 
         // --- Date & Year Logic ---
         function getAcademicYear(date) {
@@ -921,7 +943,7 @@
             if (!state.currentUser) return;
             const isAdmin = state.currentUser.role === 'admin';
             document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = isAdmin ? 'inline-block' : 'none'; // Use inline-block for dropdown
+                el.style.display = isAdmin ? 'inline-block' : 'none';
             });
 
             const roleBadge = document.getElementById('user-role-badge');
@@ -1151,35 +1173,40 @@
         async function renderUsersList() {
             const listBody = document.getElementById('users-list-body');
             listBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">Đang tải...</td></tr>';
-            const usersSnapshot = await getDocs(usersCol);
-            listBody.innerHTML = '';
-            if (usersSnapshot.empty) {
-                listBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">Không có người dùng nào.</td></tr>';
-                return;
+            try {
+                const usersSnapshot = await getDocs(usersCol);
+                listBody.innerHTML = '';
+                if (usersSnapshot.empty) {
+                    listBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">Không có người dùng nào.</td></tr>';
+                    return;
+                }
+                usersSnapshot.forEach(userDoc => {
+                    const userData = userDoc.data();
+                    const isCurrentUser = state.currentUser.uid === userDoc.id;
+                    const row = document.createElement('tr');
+                    row.className = "border-b";
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${userData.email}</td>
+                        <td class="px-4 py-2">
+                            <select data-uid="${userDoc.id}" class="role-select p-1 border rounded-md w-full" ${isCurrentUser ? 'disabled' : ''}>
+                                <option value="viewer" ${userData.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+                                <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <div class="flex justify-center items-center gap-2">
+                                <button data-uid="${userDoc.id}" class="save-role-btn bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Lưu</button>
+                                <button data-email="${userData.email}" class="reset-password-btn bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Reset Pass</button>
+                                <button data-uid="${userDoc.id}" class="delete-user-btn bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Xóa</button>
+                            </div>
+                        </td>
+                    `;
+                    listBody.appendChild(row);
+                });
+            } catch (error) {
+                listBody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-red-500">Lỗi tải danh sách người dùng.</td></tr>`;
+                console.error("Error rendering users list:", error);
             }
-            usersSnapshot.forEach(userDoc => {
-                const userData = userDoc.data();
-                const isCurrentUser = state.currentUser.uid === userDoc.id;
-                const row = document.createElement('tr');
-                row.className = "border-b";
-                row.innerHTML = `
-                    <td class="px-4 py-2">${userData.email}</td>
-                    <td class="px-4 py-2">
-                        <select data-uid="${userDoc.id}" class="role-select p-1 border rounded-md w-full" ${isCurrentUser ? 'disabled' : ''}>
-                            <option value="viewer" ${userData.role === 'viewer' ? 'selected' : ''}>Viewer</option>
-                            <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
-                        </select>
-                    </td>
-                    <td class="px-4 py-2 text-center">
-                        <div class="flex justify-center items-center gap-2">
-                            <button data-uid="${userDoc.id}" class="save-role-btn bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Lưu</button>
-                            <button data-email="${userData.email}" class="reset-password-btn bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Reset Pass</button>
-                            <button data-uid="${userDoc.id}" class="delete-user-btn bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-2 rounded" ${isCurrentUser ? 'disabled' : ''}>Xóa</button>
-                        </div>
-                    </td>
-                `;
-                listBody.appendChild(row);
-            });
         }
 
         function renderResultsList(listDiv, entries) {
@@ -1199,26 +1226,24 @@
         }
         
         function generateAndPrintFullReport() {
+            // This function now throws errors to be caught by the caller
             const lecturer = state.statsSelectedLecturer;
             const entries = state.statsEntries;
             const year = state.statsSelectedYear;
 
-            // --- FIX START: Add robust checks at the beginning ---
             if (!lecturer || !entries || !year) {
-                showAlert("Không có đủ thông tin để tạo báo cáo. Vui lòng nhấn 'Xem thống kê' trước khi in.");
-                return;
+                throw new Error("Không có đủ thông tin để tạo báo cáo. Vui lòng nhấn 'Xem thống kê' trước khi in.");
             }
             
             const department = state.departments.find(d => d.id === lecturer.departmentId);
 
             if (!department) {
-                showAlert(`Không thể tìm thấy khoa cho giảng viên ${lecturer.name}. Không thể tạo báo cáo.`);
-                return;
+                throw new Error(`Không thể tìm thấy khoa cho giảng viên ${lecturer.name}.`);
             }
-            // --- FIX END ---
             
             const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
             const printArea = document.getElementById('print-report-area');
+            const now = new Date();
 
             const reportHtml = `
                 <div style="font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0 auto; max-width: 800px;">
@@ -1277,7 +1302,7 @@
 
                     <div style="display: flex; justify-content: flex-end; margin-top: 30px;">
                         <div style="text-align: center;">
-                            <p>Hải Phòng, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}</p>
+                            <p>Hải Phòng, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</p>
                             <p style="font-weight: bold; margin-top: 15px;">Người lập biểu</p>
                             <p style="font-style: italic; margin-top: 5px;">(Ký và ghi rõ họ tên)</p>
                         </div>
@@ -1286,9 +1311,8 @@
             `;
             printArea.innerHTML = reportHtml;
             
-            setTimeout(() => {
-                window.print();
-            }, 100);
+            // Call print directly without setTimeout for better reliability
+            window.print();
         }
 
         // --- Global Functions (for inline onclick) ---
@@ -1410,7 +1434,6 @@
             document.getElementById('edit-entry-end-time').value = entry.endTime || '';
             document.getElementById('edit-entry-notes').value = entry.notes || '';
             
-            // Prevent editing description of non-custom tasks
             const descTextarea = document.getElementById('edit-entry-description');
             if (entry.description.startsWith('Nhiệm vụ khác:')) {
                 descTextarea.readOnly = false;
@@ -1429,6 +1452,7 @@
             document.getElementById('department-id').value = dep.id;
             document.getElementById('department-name').value = dep.name;
         };
+
         window.deleteDepartment = (id) => {
             showConfirm('Bạn có chắc muốn xóa khoa này? Việc này sẽ xóa tất cả giảng viên và giờ lao động liên quan.', async () => {
                 const batch = writeBatch(db);
@@ -1445,6 +1469,7 @@
                 await batch.commit();
             });
         };
+
         window.editLecturer = (id) => {
             const lecturer = state.lecturers.find(l => l.id === id);
             document.getElementById('lecturer-id').value = lecturer.id;
@@ -1452,6 +1477,7 @@
             document.getElementById('lecturer-code').value = lecturer.code;
             document.getElementById('lecturer-department').value = lecturer.departmentId;
         };
+
         window.deleteLecturer = (id) => {
             showConfirm('Bạn có chắc muốn xóa giảng viên này? Mọi giờ lao động của họ cũng sẽ bị xóa.', async () => {
                 const batch = writeBatch(db);
@@ -1462,6 +1488,7 @@
                 await batch.commit();
             });
         };
+
         window.editTask = (id) => {
             const task = state.tasks.find(t => t.id === id);
             if (task) {
@@ -1511,21 +1538,30 @@
         function setupOnSnapshotListeners() {
             if (dataListenersAttached) return; 
             dataListenersAttached = true;
+
+            const snapshotErrorHandler = (collectionName) => (error) => {
+                console.error(`Lỗi khi tải dữ liệu ${collectionName}: `, error);
+                showAlert(`Không thể tải dữ liệu cho mục "${collectionName}". Vui lòng kiểm tra kết nối mạng và làm mới trang.`);
+            };
+
             onSnapshot(departmentsCol, (snapshot) => {
                 state.departments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
-            });
+            }, snapshotErrorHandler('Khoa'));
+            
             onSnapshot(lecturersCol, (snapshot) => {
                 state.lecturers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
-            });
+            }, snapshotErrorHandler('Giảng viên'));
+
             onSnapshot(entriesCol, (snapshot) => {
                 state.entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 if (document.getElementById('details-modal').style.display === 'block' && state.currentLecturerIdForDetails) {
                     showDetails(state.currentLecturerIdForDetails);
                 }
                 renderLecturerTable(); 
-            });
+            }, snapshotErrorHandler('Giờ lao động'));
+
             onSnapshot(tasksCol, (snapshot) => {
                 if (snapshot.empty && state.currentUser.role === 'admin') {
                     const batch = writeBatch(db);
@@ -1538,7 +1574,8 @@
                     state.tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 }
                 render();
-            });
+            }, snapshotErrorHandler('Nhiệm vụ'));
+
             onSnapshot(doc(settingsCol, SETTINGS_DOC_ID), (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     state.customYears = docSnapshot.data().customYears || [];
@@ -1546,7 +1583,7 @@
                     setDoc(doc(settingsCol, SETTINGS_DOC_ID), { customYears: [] });
                 }
                 renderYearSelect();
-            });
+            }, snapshotErrorHandler('Cài đặt'));
         }
 
         async function initializeFirebase() {
@@ -1635,22 +1672,30 @@
             // Auth actions
             document.getElementById('login-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const email = document.getElementById('login-email').value;
                 const password = document.getElementById('login-password').value;
                 try {
                     await signInWithEmailAndPassword(auth, email, password);
                 } catch (error) {
                     showAlert(error.message);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
             });
             document.getElementById('register-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const email = document.getElementById('register-email').value;
                 const password = document.getElementById('register-password').value;
                 try {
                     await createUserWithEmailAndPassword(auth, email, password);
                 } catch (error) {
                     showAlert(error.message);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
             });
             document.getElementById('logout-btn').addEventListener('click', () => {
@@ -1664,22 +1709,30 @@
 
             document.getElementById('change-password-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
+
                 const currentPassword = document.getElementById('current-password').value;
                 const newPassword = document.getElementById('new-password').value;
                 const confirmNewPassword = document.getElementById('confirm-new-password').value;
 
                 if (newPassword.length < 6) {
                     showAlert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+                    setButtonLoading(btn, false);
                     return;
                 }
 
                 if (newPassword !== confirmNewPassword) {
                     showAlert('Mật khẩu mới và mật khẩu xác nhận không khớp.');
+                    setButtonLoading(btn, false);
                     return;
                 }
 
                 const user = auth.currentUser;
-                if (!user) return;
+                if (!user) {
+                    setButtonLoading(btn, false);
+                    return;
+                }
 
                 try {
                     const credential = EmailAuthProvider.credential(user.email, currentPassword);
@@ -1695,6 +1748,8 @@
                     } else {
                         showAlert(`Đã xảy ra lỗi: ${error.message}`);
                     }
+                } finally {
+                    setButtonLoading(btn, false);
                 }
             });
 
@@ -1705,40 +1760,49 @@
             });
             
             document.getElementById('users-list-body').addEventListener('click', async (e) => {
-                const target = e.target.closest('button'); // Handle clicks on icons inside buttons
+                const target = e.target.closest('button');
                 if (!target) return;
 
+                const uid = target.dataset.uid;
+                const email = target.dataset.email;
+
                 if (target.classList.contains('save-role-btn')) {
-                    const uid = target.dataset.uid;
                     const selectEl = document.querySelector(`.role-select[data-uid="${uid}"]`);
                     const newRole = selectEl.value;
+                    setButtonLoading(target, true);
                     try {
                         await updateDoc(doc(usersCol, uid), { role: newRole });
                         showAlert('Cập nhật vai trò thành công!', true);
                     } catch (error) {
                         showAlert(`Lỗi cập nhật vai trò: ${error.message}`);
+                    } finally {
+                        setButtonLoading(target, false);
                     }
                 }
                 if (target.classList.contains('reset-password-btn')) {
-                    const email = target.dataset.email;
                     showConfirm(`Bạn có chắc muốn gửi email reset mật khẩu cho ${email}?`, async () => {
+                        setButtonLoading(target, true);
                         try {
                             await sendPasswordResetEmail(auth, email);
                             showAlert(`Đã gửi email reset mật khẩu tới ${email}.`, true);
                         } catch (error) {
                              showAlert(`Lỗi gửi email: ${error.message}`);
+                        } finally {
+                            setButtonLoading(target, false);
                         }
                     });
                 }
                 if (target.classList.contains('delete-user-btn')) {
-                    const uid = target.dataset.uid;
-                    showConfirm('Bạn có chắc muốn xóa người dùng này? Hành động này chỉ xóa thông tin khỏi danh sách, không xóa tài khoản đăng nhập vĩnh viễn.', async () => {
+                    showConfirm('Bạn có chắc muốn xóa người dùng này khỏi hệ thống?', async () => {
+                        setButtonLoading(target, true);
                         try {
                             await deleteDoc(doc(usersCol, uid));
                             showAlert('Đã xóa người dùng khỏi danh sách.', true);
-                            renderUsersList();
+                            await renderUsersList();
                         } catch (error) {
                             showAlert(`Lỗi xóa người dùng: ${error.message}`);
+                        } finally {
+                            setButtonLoading(target, false);
                         }
                     });
                 }
@@ -1769,13 +1833,8 @@
             });
             
             // Details Modal Actions
-            document.getElementById('select-all-entries').addEventListener('change', (e) => {
-                document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
-                });
-            });
-
-            document.getElementById('delete-selected-entries-btn').addEventListener('click', async () => {
+            document.getElementById('delete-selected-entries-btn').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
                 const selectedIds = Array.from(document.querySelectorAll('.entry-checkbox:checked'))
                                          .map(cb => cb.dataset.entryId);
                 if (selectedIds.length === 0) {
@@ -1784,12 +1843,19 @@
                 }
 
                 showConfirm(`Bạn có chắc muốn xóa ${selectedIds.length} mục đã chọn?`, async () => {
-                    const batch = writeBatch(db);
-                    selectedIds.forEach(id => {
-                        batch.delete(doc(entriesCol, id));
-                    });
-                    await batch.commit();
-                    showAlert('Đã xóa các mục đã chọn thành công!', true);
+                    setButtonLoading(btn, true);
+                    try {
+                        const batch = writeBatch(db);
+                        selectedIds.forEach(id => {
+                            batch.delete(doc(entriesCol, id));
+                        });
+                        await batch.commit();
+                        showAlert('Đã xóa các mục đã chọn thành công!', true);
+                    } catch (error) {
+                        showAlert(`Lỗi khi xóa: ${error.message}`);
+                    } finally {
+                        setButtonLoading(btn, false);
+                    }
                 });
             });
 
@@ -1811,25 +1877,39 @@
 
             document.getElementById('add-year-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const newYear = document.getElementById('new-year-input').value.trim();
                 if (newYear) {
-                    if (!/^\d{4}-\d{4}$/.test(newYear)) { showAlert("Định dạng năm học không hợp lệ."); return; }
+                    if (!/^\d{4}-\d{4}$/.test(newYear)) { showAlert("Định dạng năm học không hợp lệ."); setButtonLoading(btn, false); return; }
                     const [start, end] = newYear.split('-').map(Number);
-                    if (end !== start + 1) { showAlert("Năm học không hợp lệ."); return; }
+                    if (end !== start + 1) { showAlert("Năm học không hợp lệ."); setButtonLoading(btn, false); return; }
                     if (!state.customYears.includes(newYear)) {
                         const newYears = [...state.customYears, newYear];
-                        await setDoc(doc(settingsCol, SETTINGS_DOC_ID), { customYears: newYears });
-                        state.selectedYear = newYear;
-                        closeModal('add-year-modal');
-                    } else { showAlert("Năm học này đã tồn tại."); }
+                        try {
+                            await setDoc(doc(settingsCol, SETTINGS_DOC_ID), { customYears: newYears });
+                            state.selectedYear = newYear;
+                            closeModal('add-year-modal');
+                        } catch(error) {
+                            showAlert(`Lỗi thêm năm học: ${error.message}`);
+                        } finally {
+                            setButtonLoading(btn, false);
+                        }
+                    } else { showAlert("Năm học này đã tồn tại."); setButtonLoading(btn, false); }
+                } else {
+                    setButtonLoading(btn, false);
                 }
             });
 
             document.getElementById('bulk-add-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
+
                 const selectedLecturerIds = Array.from(document.querySelectorAll('.lecturer-checkbox:checked')).map(cb => cb.value);
                 if (selectedLecturerIds.length === 0) {
                     showAlert('Vui lòng chọn ít nhất một giảng viên.');
+                    setButtonLoading(btn, false);
                     return;
                 }
 
@@ -1850,7 +1930,7 @@
 
                         if (!task || !date || isNaN(quantity) || quantity <= 0) {
                             showAlert('Vui lòng điền đầy đủ thông tin cho nhiệm vụ có sẵn.');
-                            return;
+                            throw new Error("Invalid predefined task data");
                         }
                         description = task.name;
                         hours = task.hours * quantity;
@@ -1863,9 +1943,9 @@
                         endTime = document.getElementById('custom-end-time').value || null;
                         notes = document.getElementById('custom-notes').value.trim();
 
-                        if (!description || !date || isNaN(hours) || hours <= 0) {
+                        if (!description.replace('Nhiệm vụ khác:', '').trim() || !date || isNaN(hours) || hours <= 0) {
                             showAlert('Vui lòng điền đầy đủ và hợp lệ các thông tin cho nhiệm vụ khác.');
-                            return;
+                            throw new Error("Invalid custom task data");
                         }
                     }
 
@@ -1881,13 +1961,19 @@
 
                 } catch (error) {
                     console.error("Error adding entries:", error);
-                    showAlert(`Đã xảy ra lỗi khi lưu: ${error.message}`);
+                    if (!error.message.includes("Invalid")) {
+                        showAlert(`Đã xảy ra lỗi khi lưu: ${error.message}`);
+                    }
+                } finally {
+                    setButtonLoading(btn, false);
                 }
             });
 
             // Edit Entry Form
             document.getElementById('edit-entry-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const entryId = document.getElementById('edit-entry-id').value;
                 const updatedData = {
                     description: document.getElementById('edit-entry-description').value,
@@ -1903,6 +1989,7 @@
 
                 if (isNaN(updatedData.hours) || !updatedData.date) {
                     showAlert('Vui lòng điền đầy đủ các trường bắt buộc (Số giờ, Ngày bắt đầu).');
+                    setButtonLoading(btn, false);
                     return;
                 }
 
@@ -1913,6 +2000,8 @@
                 } catch (error) {
                     showAlert(`Lỗi cập nhật: ${error.message}`);
                     console.error("Error updating entry:", error);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
             });
 
@@ -1961,37 +2050,56 @@
                 openModal('bulk-delete-modal');
             });
 
-            document.getElementById('find-entries-to-delete-btn').addEventListener('click', async () => {
-                const depId = document.getElementById('bulk-delete-department').value;
-                const year = document.getElementById('bulk-delete-year').value;
-                const descriptionText = document.getElementById('bulk-delete-description').value.trim().toLowerCase();
-                const date = document.getElementById('bulk-delete-date').value;
+            document.getElementById('find-entries-to-delete-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                setButtonLoading(btn, true);
                 
-                const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
-                state.foundEntriesToDelete = filteredEntries;
+                setTimeout(() => {
+                    try {
+                        const depId = document.getElementById('bulk-delete-department').value;
+                        const year = document.getElementById('bulk-delete-year').value;
+                        const descriptionText = document.getElementById('bulk-delete-description').value.trim().toLowerCase();
+                        const date = document.getElementById('bulk-delete-date').value;
+                        
+                        const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
+                        state.foundEntriesToDelete = filteredEntries;
 
-                const resultsContainer = document.getElementById('bulk-delete-results-container');
-                const summaryDiv = document.getElementById('bulk-delete-results-summary');
-                const listDiv = document.getElementById('bulk-delete-results-list');
-                
-                summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp.`;
-                renderResultsList(listDiv, filteredEntries);
+                        const resultsContainer = document.getElementById('bulk-delete-results-container');
+                        const summaryDiv = document.getElementById('bulk-delete-results-summary');
+                        const listDiv = document.getElementById('bulk-delete-results-list');
+                        
+                        summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp.`;
+                        renderResultsList(listDiv, filteredEntries);
 
-                if (filteredEntries.length > 0) {
-                    resultsContainer.classList.remove('hidden');
-                } else {
-                    resultsContainer.classList.add('hidden');
-                }
+                        if (filteredEntries.length > 0) {
+                            resultsContainer.classList.remove('hidden');
+                        } else {
+                            resultsContainer.classList.add('hidden');
+                        }
+                    } catch(error) {
+                        showAlert(`Lỗi khi tìm kiếm: ${error.message}`);
+                    } finally {
+                        setButtonLoading(btn, false);
+                    }
+                }, 10);
             });
 
-            document.getElementById('confirm-bulk-delete-btn').addEventListener('click', async () => {
+            document.getElementById('confirm-bulk-delete-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
                 if (state.foundEntriesToDelete.length === 0) { showAlert('Không có mục nào để xóa.'); return; }
                 showConfirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ${state.foundEntriesToDelete.length} mục đã tìm thấy? Hành động này KHÔNG THỂ hoàn tác.`, async () => {
-                    const batch = writeBatch(db);
-                    state.foundEntriesToDelete.forEach(entry => { batch.delete(doc(entriesCol, entry.id)); });
-                    await batch.commit();
-                    showAlert('Xóa hàng loạt thành công!', true);
-                    closeModal('bulk-delete-modal');
+                    setButtonLoading(btn, true);
+                    try {
+                        const batch = writeBatch(db);
+                        state.foundEntriesToDelete.forEach(entry => { batch.delete(doc(entriesCol, entry.id)); });
+                        await batch.commit();
+                        showAlert('Xóa hàng loạt thành công!', true);
+                        closeModal('bulk-delete-modal');
+                    } catch (error) {
+                         showAlert(`Lỗi khi xóa: ${error.message}`);
+                    } finally {
+                        setButtonLoading(btn, false);
+                    }
                 });
             });
             
@@ -2013,30 +2121,41 @@
                 openModal('bulk-edit-modal');
             });
 
-            document.getElementById('find-entries-to-edit-btn').addEventListener('click', () => {
-                const depId = document.getElementById('bulk-edit-department').value;
-                const year = document.getElementById('bulk-edit-year').value;
-                const descriptionText = document.getElementById('bulk-edit-description').value.trim().toLowerCase();
-                const date = document.getElementById('bulk-edit-date').value;
-                
-                const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
-                state.foundEntriesToEdit = filteredEntries;
+            document.getElementById('find-entries-to-edit-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                setButtonLoading(btn, true);
+                setTimeout(() => {
+                    try {
+                        const depId = document.getElementById('bulk-edit-department').value;
+                        const year = document.getElementById('bulk-edit-year').value;
+                        const descriptionText = document.getElementById('bulk-edit-description').value.trim().toLowerCase();
+                        const date = document.getElementById('bulk-edit-date').value;
+                        
+                        const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
+                        state.foundEntriesToEdit = filteredEntries;
 
-                const resultsContainer = document.getElementById('bulk-edit-results-container');
-                const summaryDiv = document.getElementById('bulk-edit-results-summary');
-                const listDiv = document.getElementById('bulk-edit-results-list');
-                
-                summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp. Vui lòng nhập các thay đổi bên dưới.`;
-                renderResultsList(listDiv, filteredEntries);
+                        const resultsContainer = document.getElementById('bulk-edit-results-container');
+                        const summaryDiv = document.getElementById('bulk-edit-results-summary');
+                        const listDiv = document.getElementById('bulk-edit-results-list');
+                        
+                        summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp. Vui lòng nhập các thay đổi bên dưới.`;
+                        renderResultsList(listDiv, filteredEntries);
 
-                if (filteredEntries.length > 0) {
-                    resultsContainer.classList.remove('hidden');
-                } else {
-                    resultsContainer.classList.add('hidden');
-                }
+                        if (filteredEntries.length > 0) {
+                            resultsContainer.classList.remove('hidden');
+                        } else {
+                            resultsContainer.classList.add('hidden');
+                        }
+                    } catch(error) {
+                        showAlert(`Lỗi khi tìm kiếm: ${error.message}`);
+                    } finally {
+                        setButtonLoading(btn, false);
+                    }
+                }, 10);
             });
 
-            document.getElementById('confirm-bulk-edit-btn').addEventListener('click', async () => {
+            document.getElementById('confirm-bulk-edit-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
                 if (state.foundEntriesToEdit.length === 0) { showAlert('Không có mục nào để sửa.'); return; }
                 
                 const newDate = document.getElementById('bulk-edit-new-date').value;
@@ -2046,7 +2165,6 @@
                 const updateData = {};
                 if (newDate) updateData.date = newDate;
                 if (newEndDate) updateData.endDate = newEndDate;
-                // Allow setting notes to empty string
                 if (document.getElementById('bulk-edit-new-notes').value !== '') {
                     updateData.notes = newNotes;
                 }
@@ -2057,13 +2175,20 @@
                 }
 
                 showConfirm(`Bạn có chắc muốn áp dụng các thay đổi này cho ${state.foundEntriesToEdit.length} mục đã tìm thấy?`, async () => {
-                    const batch = writeBatch(db);
-                    state.foundEntriesToEdit.forEach(entry => {
-                        batch.update(doc(entriesCol, entry.id), updateData);
-                    });
-                    await batch.commit();
-                    showAlert('Sửa hàng loạt thành công!', true);
-                    closeModal('bulk-edit-modal');
+                    setButtonLoading(btn, true);
+                    try {
+                        const batch = writeBatch(db);
+                        state.foundEntriesToEdit.forEach(entry => {
+                            batch.update(doc(entriesCol, entry.id), updateData);
+                        });
+                        await batch.commit();
+                        showAlert('Sửa hàng loạt thành công!', true);
+                        closeModal('bulk-edit-modal');
+                    } catch (error) {
+                        showAlert(`Lỗi khi sửa: ${error.message}`);
+                    } finally {
+                        setButtonLoading(btn, false);
+                    }
                 });
             });
 
@@ -2095,110 +2220,158 @@
                 }
             });
 
-            document.getElementById('view-statistics-btn').addEventListener('click', () => {
-                const lecturerId = document.getElementById('stats-lecturer-select').value;
-                const year = document.getElementById('stats-year-select').value;
+            document.getElementById('view-statistics-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                setButtonLoading(btn, true);
 
-                if (!lecturerId || !year) {
-                    showAlert("Vui lòng chọn đầy đủ Khoa, Năm học và Giảng viên.");
-                    return;
-                }
+                setTimeout(() => {
+                    try {
+                        const lecturerId = document.getElementById('stats-lecturer-select').value;
+                        const year = document.getElementById('stats-year-select').value;
 
-                state.statsSelectedLecturer = state.lecturers.find(l => l.id === lecturerId);
-                state.statsSelectedYear = year;
-                state.statsEntries = state.entries
-                    .filter(e => e.lecturerId === lecturerId && (e.academicYear ? e.academicYear === year : getAcademicYear(e.date) === year))
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                        if (!lecturerId || !year) {
+                            showAlert("Vui lòng chọn đầy đủ Khoa, Năm học và Giảng viên.");
+                            return;
+                        }
 
-                const resultsContainer = document.getElementById('statistics-results-container');
-                const resultsTable = document.getElementById('statistics-results-table');
-                const resultsTitle = document.getElementById('statistics-results-title');
+                        state.statsSelectedLecturer = state.lecturers.find(l => l.id === lecturerId);
+                        state.statsSelectedYear = year;
+                        state.statsEntries = state.entries
+                            .filter(e => e.lecturerId === lecturerId && (e.academicYear ? e.academicYear === year : getAcademicYear(e.date) === year))
+                            .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                resultsTitle.textContent = `Kết quả thống kê cho ${state.statsSelectedLecturer.name} - Năm học ${year}`;
-                
-                if (state.statsEntries.length === 0) {
-                    resultsTable.innerHTML = '<p class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu.</p>';
-                } else {
-                    const totalHours = state.statsEntries.reduce((sum, e) => sum + e.hours, 0);
-                    resultsTable.innerHTML = `
-                        <table class="min-w-full bg-white">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase">STT</th>
-                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase">Nội dung</th>
-                                    <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase">Ngày</th>
-                                    <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase">Giờ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                ${state.statsEntries.map((entry, index) => `
-                                    <tr>
-                                        <td class="px-4 py-2 text-center">${index + 1}</td>
-                                        <td class="px-4 py-2">${entry.description}</td>
-                                        <td class="px-4 py-2 text-center">${new Date(entry.date).toLocaleDateString('vi-VN')}</td>
-                                        <td class="px-4 py-2 text-center font-semibold">${entry.hours}</td>
-                                    </tr>
-                                `).join('')}
-                                <tr>
-                                    <td colspan="3" class="px-4 py-2 text-right font-bold">TỔNG CỘNG</td>
-                                    <td class="px-4 py-2 text-center font-bold text-red-600">${totalHours}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `;
-                }
-                resultsContainer.classList.remove('hidden');
+                        const resultsContainer = document.getElementById('statistics-results-container');
+                        const resultsTable = document.getElementById('statistics-results-table');
+                        const resultsTitle = document.getElementById('statistics-results-title');
+
+                        resultsTitle.textContent = `Kết quả thống kê cho ${state.statsSelectedLecturer.name} - Năm học ${year}`;
+                        
+                        if (state.statsEntries.length === 0) {
+                            resultsTable.innerHTML = '<p class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu.</p>';
+                        } else {
+                            const totalHours = state.statsEntries.reduce((sum, e) => sum + e.hours, 0);
+                            resultsTable.innerHTML = `
+                                <table class="min-w-full bg-white">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase">STT</th>
+                                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase">Nội dung</th>
+                                            <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase">Ngày</th>
+                                            <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase">Giờ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        ${state.statsEntries.map((entry, index) => `
+                                            <tr>
+                                                <td class="px-4 py-2 text-center">${index + 1}</td>
+                                                <td class="px-4 py-2">${entry.description}</td>
+                                                <td class="px-4 py-2 text-center">${new Date(entry.date).toLocaleDateString('vi-VN')}</td>
+                                                <td class="px-4 py-2 text-center font-semibold">${entry.hours}</td>
+                                            </tr>
+                                        `).join('')}
+                                        <tr>
+                                            <td colspan="3" class="px-4 py-2 text-right font-bold">TỔNG CỘNG</td>
+                                            <td class="px-4 py-2 text-center font-bold text-red-600">${totalHours}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `;
+                        }
+                        resultsContainer.classList.remove('hidden');
+                    } catch (error) {
+                        showAlert(`Lỗi khi xem thống kê: ${error.message}`);
+                    } finally {
+                        setButtonLoading(btn, false);
+                    }
+                }, 10);
             });
 
-            document.getElementById('print-report-btn').addEventListener('click', generateAndPrintFullReport);
+            document.getElementById('print-report-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                setButtonLoading(btn, true);
+                try {
+                    // Sửa lỗi: Gọi hàm in một cách trực tiếp và đáng tin cậy hơn
+                    generateAndPrintFullReport();
+                } catch (error) {
+                    console.error("Lỗi khi in:", error);
+                    showAlert(`Không thể tạo báo cáo để in: ${error.message}`);
+                } finally {
+                    // Đặt lại trạng thái nút sau một khoảng trễ ngắn để hộp thoại in có thời gian xuất hiện
+                    setTimeout(() => setButtonLoading(btn, false), 1000);
+                }
+            });
 
 
             // Other forms
             document.getElementById('department-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const id = document.getElementById('department-id').value;
                 const name = document.getElementById('department-name').value.trim();
-                if (!name) return;
-                if (id) {
-                    await updateDoc(doc(departmentsCol, id), { name });
-                } else {
-                    await addDoc(departmentsCol, { name });
+                if (!name) { setButtonLoading(btn, false); return; }
+                try {
+                    if (id) {
+                        await updateDoc(doc(departmentsCol, id), { name });
+                    } else {
+                        await addDoc(departmentsCol, { name });
+                    }
+                    e.target.reset();
+                    document.getElementById('department-id').value = '';
+                } catch (error) {
+                    showAlert(`Lỗi lưu khoa: ${error.message}`);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
-                e.target.reset();
-                document.getElementById('department-id').value = '';
             });
 
             document.getElementById('lecturer-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const id = document.getElementById('lecturer-id').value;
                 const name = document.getElementById('lecturer-name').value.trim();
                 const code = document.getElementById('lecturer-code').value.trim();
                 const departmentId = document.getElementById('lecturer-department').value;
-                if (!name || !code || !departmentId) { showAlert("Vui lòng điền đầy đủ thông tin."); return; }
+                if (!name || !code || !departmentId) { showAlert("Vui lòng điền đầy đủ thông tin."); setButtonLoading(btn, false); return; }
                 const data = { name, code, departmentId };
-                if (id) {
-                    await updateDoc(doc(lecturersCol, id), data);
-                } else {
-                    await addDoc(lecturersCol, data);
+                try {
+                    if (id) {
+                        await updateDoc(doc(lecturersCol, id), data);
+                    } else {
+                        await addDoc(lecturersCol, data);
+                    }
+                    e.target.reset();
+                    document.getElementById('lecturer-id').value = '';
+                } catch (error) {
+                    showAlert(`Lỗi lưu giảng viên: ${error.message}`);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
-                e.target.reset();
-                document.getElementById('lecturer-id').value = '';
             });
 
             document.getElementById('task-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(btn, true);
                 const id = document.getElementById('task-id').value;
                 const name = document.getElementById('task-name').value.trim();
                 const unit = document.getElementById('task-unit').value.trim();
                 const hours = parseFloat(document.getElementById('task-hours').value);
-                if (!name || !unit || isNaN(hours) || hours < 0) { showAlert("Vui lòng điền đầy đủ thông tin."); return; }
+                if (!name || !unit || isNaN(hours) || hours < 0) { showAlert("Vui lòng điền đầy đủ thông tin."); setButtonLoading(btn, false); return; }
                 const data = { name, unit, hours };
-                if (id) {
-                    await updateDoc(doc(tasksCol, id), data);
-                } else {
-                    await addDoc(tasksCol, data);
+                try {
+                    if (id) {
+                        await updateDoc(doc(tasksCol, id), data);
+                    } else {
+                        await addDoc(tasksCol, data);
+                    }
+                    clearTaskForm();
+                } catch (error) {
+                    showAlert(`Lỗi lưu nhiệm vụ: ${error.message}`);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
-                clearTaskForm();
             });
 
             document.getElementById('task-select').addEventListener('change', updateCalculatedHours);
