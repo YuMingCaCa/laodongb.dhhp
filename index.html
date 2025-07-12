@@ -1200,14 +1200,22 @@
         
         function generateAndPrintFullReport() {
             const lecturer = state.statsSelectedLecturer;
-            const department = state.departments.find(d => d.id === lecturer.departmentId);
             const entries = state.statsEntries;
             const year = state.statsSelectedYear;
 
-            if (!lecturer || !department || !entries || !year) {
-                showAlert("Không đủ thông tin để tạo báo cáo.");
+            // --- FIX START: Add robust checks at the beginning ---
+            if (!lecturer || !entries || !year) {
+                showAlert("Không có đủ thông tin để tạo báo cáo. Vui lòng nhấn 'Xem thống kê' trước khi in.");
                 return;
             }
+            
+            const department = state.departments.find(d => d.id === lecturer.departmentId);
+
+            if (!department) {
+                showAlert(`Không thể tìm thấy khoa cho giảng viên ${lecturer.name}. Không thể tạo báo cáo.`);
+                return;
+            }
+            // --- FIX END ---
             
             const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
             const printArea = document.getElementById('print-report-area');
