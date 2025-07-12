@@ -887,6 +887,27 @@
 
 
         // --- Date & Year Logic ---
+        /**
+         * Formats a date string (e.g., 'YYYY-MM-DD') into 'dd/mm/yyyy' format.
+         * Handles potential timezone issues by creating a UTC date object.
+         * @param {string} dateString The date string from Firestore or input.
+         * @returns {string} The formatted date string 'dd/mm/yyyy'.
+         */
+        function formatDate(dateString) {
+            if (!dateString || typeof dateString !== 'string') return '';
+            
+            // Create a date object assuming UTC to avoid timezone shifts from local time.
+            const date = new Date(dateString + 'T00:00:00Z');
+            
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const year = date.getUTCFullYear();
+            
+            if (isNaN(year)) return ''; // Return empty for invalid dates
+            
+            return `${day}/${month}/${year}`;
+        }
+
         function getAcademicYear(date) {
             if (!date) return null;
             const d = new Date(date);
@@ -1199,7 +1220,7 @@
                     const lecturer = state.lecturers.find(l => l.id === entry.lecturerId);
                     const item = document.createElement('li');
                     item.className = 'py-2 text-sm';
-                    item.innerHTML = `<b>${lecturer ? lecturer.name : 'N/A'}</b>: ${entry.description} (${new Date(entry.date).toLocaleDateString('vi-VN')}) - <i>${entry.hours} giờ</i>`;
+                    item.innerHTML = `<b>${lecturer ? lecturer.name : 'N/A'}</b>: ${entry.description} (${formatDate(entry.date)}) - <i>${entry.hours} giờ</i>`;
                     list.appendChild(item);
                 });
                 listDiv.appendChild(list);
@@ -1282,7 +1303,7 @@
                                 <tr>
                                     <td style="text-align: center;">${index + 1}</td>
                                     <td>${entry.description}</td>
-                                    <td style="text-align: center;">${new Date(entry.date).toLocaleDateString('vi-VN')}</td>
+                                    <td style="text-align: center;">${formatDate(entry.date)}</td>
                                     <td style="text-align: center;">${entry.hours}</td>
                                     <td>${entry.notes || ''}</td>
                                 </tr>
@@ -1375,9 +1396,9 @@
                             <button onclick="openEditEntryModal('${entry.id}')" class="text-blue-500 hover:text-blue-700" title="Sửa mục này"><i class="fas fa-edit"></i></button>
                          </div>` : '';
 
-                    let dateInfo = new Date(entry.date).toLocaleDateString('vi-VN');
+                    let dateInfo = formatDate(entry.date);
                     if (entry.endDate && entry.endDate !== entry.date) {
-                        dateInfo = `Từ ${dateInfo} đến ${new Date(entry.endDate).toLocaleDateString('vi-VN')}`;
+                        dateInfo = `Từ ${dateInfo} đến ${formatDate(entry.endDate)}`;
                     }
 
                     let timeInfo = '';
@@ -2257,7 +2278,7 @@
                                             <tr>
                                                 <td class="px-4 py-2 text-center">${index + 1}</td>
                                                 <td class="px-4 py-2">${entry.description}</td>
-                                                <td class="px-4 py-2 text-center">${new Date(entry.date).toLocaleDateString('vi-VN')}</td>
+                                                <td class="px-4 py-2 text-center">${formatDate(entry.date)}</td>
                                                 <td class="px-4 py-2 text-center font-semibold">${entry.hours}</td>
                                             </tr>
                                         `).join('')}
