@@ -42,19 +42,19 @@
             animation-duration: 0.4s
         }
         @-webkit-keyframes slideIn {
-            from {top: -300px; opacity: 0} 
+            from {top: -300px; opacity: 0}
             to {top: 0; opacity: 1}
         }
         @keyframes slideIn {
-            from {margin-top: -5%; opacity: 0} 
+            from {margin-top: -5%; opacity: 0}
             to {margin-top: 5%; opacity: 1}
         }
         @-webkit-keyframes fadeIn {
-            from {opacity: 0} 
+            from {opacity: 0}
             to {opacity: 1}
         }
         @keyframes fadeIn {
-            from {opacity: 0} 
+            from {opacity: 0}
             to {opacity: 1}
         }
         .close-button {
@@ -132,7 +132,7 @@
                 </div>
             </form>
             <p class="mt-6 text-center text-sm text-gray-600">
-                Chưa có tài khoản? 
+                Chưa có tài khoản?
                 <a href="#" id="show-register-link" class="font-medium text-blue-600 hover:text-blue-500">Đăng ký ngay</a>
             </p>
         </div>
@@ -155,7 +155,7 @@
                 </div>
             </form>
             <p class="mt-6 text-center text-sm text-gray-600">
-                Đã có tài khoản? 
+                Đã có tài khoản?
                 <a href="#" id="show-login-link" class="font-medium text-blue-600 hover:text-blue-500">Đăng nhập</a>
             </p>
         </div>
@@ -251,7 +251,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modals -->
     <!-- Statistics Modal -->
     <div id="statistics-modal" class="modal">
@@ -268,12 +268,15 @@
                     <select id="stats-year-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
                 </div>
                 <div>
-                    <label for="stats-lecturer-select" class="block text-sm font-medium text-gray-700">Giảng viên</label>
+                    <label for="stats-lecturer-select" class="block text-sm font-medium text-gray-700">Giảng viên (tùy chọn)</label>
                     <select id="stats-lecturer-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
                 </div>
-                <div class="md:col-span-3">
-                    <button id="view-statistics-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-                        <i class="fas fa-search mr-2"></i>Xem thống kê
+                <div class="md:col-span-3 flex flex-col sm:flex-row gap-2">
+                    <button id="view-statistics-btn" class="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-search mr-2"></i>Xem thống kê (GV)
+                    </button>
+                    <button id="export-department-report-btn" class="flex-1 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <i class="fas fa-file-invoice mr-2"></i>Xuất báo cáo (Khoa)
                     </button>
                 </div>
             </div>
@@ -281,8 +284,8 @@
                 <h4 id="statistics-results-title" class="font-semibold text-gray-800 mb-2">Kết quả thống kê:</h4>
                 <div id="statistics-results-table" class="max-h-80 overflow-y-auto border rounded-md"></div>
                 <div class="mt-4 flex justify-end">
-                    <button id="export-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
-                        <i class="fas fa-file-export mr-2"></i>Xuất Báo cáo
+                    <button id="export-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg hidden">
+                        <i class="fas fa-file-export mr-2"></i>Xuất Báo cáo Giảng viên
                     </button>
                 </div>
             </div>
@@ -375,7 +378,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Bulk Add Modal -->
     <div id="bulk-add-modal" class="modal">
         <div class="modal-content">
@@ -480,7 +483,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Manage Lecturers Modal -->
     <div id="manage-lecturers-modal" class="modal">
         <div class="modal-content">
@@ -521,7 +524,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Manage Departments Modal -->
     <div id="manage-departments-modal" class="modal">
         <div class="modal-content">
@@ -545,7 +548,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Details Modal -->
     <div id="details-modal" class="modal">
         <div class="modal-content">
@@ -563,7 +566,7 @@
             <div id="details-content" class="max-h-80 overflow-y-auto"></div>
         </div>
     </div>
-    
+
     <!-- Edit Entry Modal -->
      <div id="edit-entry-modal" class="modal">
         <div class="modal-content">
@@ -663,7 +666,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Bulk Edit Tool Modal -->
     <div id="bulk-edit-modal" class="modal">
         <div class="modal-content">
@@ -700,7 +703,7 @@
             <div id="bulk-edit-results-container" class="mt-4 hidden">
                 <h4 class="font-semibold text-lg mb-2">2. Kết quả & Các thay đổi cần áp dụng</h4>
                 <div id="bulk-edit-results-summary" class="p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-800 mb-2"></div>
-                
+
                 <!-- NEW: Detailed results list -->
                 <div id="bulk-edit-results-list" class="max-h-60 overflow-y-auto border rounded-md p-2 mt-2"></div>
 
@@ -752,12 +755,12 @@
             </div>
         </div>
     </div>
-    
+
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
+        import {
+            getAuth,
             onAuthStateChanged,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
@@ -767,20 +770,20 @@
             EmailAuthProvider,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            onSnapshot, 
-            addDoc, 
-            doc, 
-            setDoc, 
+        import {
+            getFirestore,
+            collection,
+            onSnapshot,
+            addDoc,
+            doc,
+            setDoc,
             getDoc,
             getDocs,
-            updateDoc, 
-            deleteDoc, 
-            writeBatch, 
-            query, 
-            where 
+            updateDoc,
+            deleteDoc,
+            writeBatch,
+            query,
+            where
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Default data for seeding
@@ -817,7 +820,7 @@
             statsSelectedLecturer: null, // For the statistics tool
             statsSelectedYear: null, // For the statistics tool
         };
-        
+
         // Firebase variables
         let db, auth;
         let usersCol, departmentsCol, lecturersCol, tasksCol, entriesCol, settingsCol;
@@ -834,7 +837,7 @@
             const modal = document.getElementById('alert-modal');
             const title = document.getElementById('alert-title');
             document.getElementById('alert-message').textContent = message;
-            
+
             if (isSuccess) {
                 title.textContent = "Thành công";
                 title.className = "text-lg font-bold mb-4 text-green-600";
@@ -848,13 +851,13 @@
                 modal.style.display = 'none';
             };
         }
-        
+
         function showConfirm(message, onConfirm) {
             const modal = document.getElementById('confirm-modal');
             document.getElementById('confirm-message').textContent = message;
             const yesBtn = document.getElementById('confirm-btn-yes');
             const noBtn = document.getElementById('confirm-btn-no');
-            
+
             const newYesBtn = yesBtn.cloneNode(true);
             yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
 
@@ -895,16 +898,16 @@
          */
         function formatDate(dateString) {
             if (!dateString || typeof dateString !== 'string') return '';
-            
+
             // Create a date object assuming UTC to avoid timezone shifts from local time.
             const date = new Date(dateString + 'T00:00:00Z');
-            
+
             const day = String(date.getUTCDate()).padStart(2, '0');
             const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-indexed
             const year = date.getUTCFullYear();
-            
+
             if (isNaN(year)) return ''; // Return empty for invalid dates
-            
+
             return `${day}/${month}/${year}`;
         }
 
@@ -983,7 +986,7 @@
                 select.appendChild(option);
             });
         }
-        
+
         function renderLecturerTable() {
             const tableBody = document.getElementById('lecturers-table-body');
             const departmentTitle = document.getElementById('department-title');
@@ -1017,7 +1020,7 @@
                 tableBody.appendChild(row);
             });
         }
-        
+
         function renderDepartmentsList() {
             const listBody = document.getElementById('departments-list-body');
             listBody.innerHTML = '';
@@ -1089,7 +1092,7 @@
             const checklist = document.getElementById('lecturer-checklist');
             checklist.innerHTML = '';
             const lecturersInDept = state.lecturers.filter(l => l.departmentId === departmentId);
-            document.getElementById('select-all-lecturers').checked = false; 
+            document.getElementById('select-all-lecturers').checked = false;
 
             if (lecturersInDept.length > 0) {
                 lecturersInDept.forEach(lecturer => {
@@ -1118,7 +1121,7 @@
             if (state.selectedDepartmentId && state.selectedDepartmentId !== 'all') {
                  modalDepSelect.value = state.selectedDepartmentId;
             }
-            
+
             const modalYearSelect = document.getElementById('bulk-add-year-select');
             modalYearSelect.innerHTML = '';
             getYearsForSelect().forEach(year => {
@@ -1151,7 +1154,7 @@
             document.getElementById('custom-end-time').value = '';
             document.getElementById('predefined-notes').value = '';
             document.getElementById('custom-notes').value = '';
-            
+
             updateCalculatedHours();
         }
 
@@ -1166,7 +1169,7 @@
                 document.getElementById('calculated-hours').textContent = `0 giờ`;
             }
         }
-        
+
         function clearTaskForm() {
             document.getElementById('task-form').reset();
             document.getElementById('task-id').value = '';
@@ -1226,7 +1229,7 @@
                 listDiv.appendChild(list);
             }
         }
-        
+
         function generateReportHtml() {
             const lecturer = state.statsSelectedLecturer;
             const entries = state.statsEntries;
@@ -1235,13 +1238,13 @@
             if (!lecturer || !entries || !year) {
                 throw new Error("Không có đủ thông tin để tạo báo cáo. Vui lòng nhấn 'Xem thống kê' trước khi in.");
             }
-            
+
             const department = state.departments.find(d => d.id === lecturer.departmentId);
 
             if (!department) {
                 throw new Error(`Không thể tìm thấy khoa cho giảng viên ${lecturer.name}.`);
             }
-            
+
             const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
             const now = new Date();
 
@@ -1328,6 +1331,102 @@
             `;
         }
 
+        function generateDepartmentReportHtml(department, lecturersWithHours, year) {
+            if (!department || !lecturersWithHours || !year) {
+                throw new Error("Thông tin không đầy đủ để tạo báo cáo khoa.");
+            }
+
+            const grandTotalHours = lecturersWithHours.reduce((sum, item) => sum + item.totalHours, 0);
+            const now = new Date();
+
+            return `
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Báo cáo tổng hợp - ${department.name} - ${year}</title>
+                    <style>
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0 auto; max-width: 800px; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 13pt; }
+                        th, td { border: 1px solid black; padding: 8px; text-align: left; vertical-align: top;}
+                        th { font-weight: bold; text-align: center; }
+                        td.center { text-align: center; }
+                        .header-container { display: flex; justify-content: space-between; text-align: center; }
+                        .header-container p { margin: 0; }
+                        .header-container hr { width: 50%; margin: 4px auto; border-top: 1px solid black; }
+                        .report-title { text-align: center; font-weight: bold; font-size: 16pt; margin-top: 40px; margin-bottom: 20px; }
+                        .footer-container { display: flex; justify-content: space-between; margin-top: 40px; }
+                        .footer-container div { text-align: center; flex-basis: 50%; }
+                        .signature { font-weight: bold; margin-top: 15px; }
+                        .signature-note { font-style: italic; margin-top: 5px; }
+                        .no-data { text-align: center; font-style: italic; color: #555; padding: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header-container">
+                        <div>
+                            <p style="text-transform: uppercase;">TRƯỜNG ĐẠI HỌC HẢI PHÒNG</p>
+                            <p style="text-transform: uppercase; font-weight: bold;">${department.name}</p>
+                            <hr>
+                        </div>
+                        <div>
+                            <p style="font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                            <p style="font-weight: bold;">Độc lập - Tự do - Hạnh phúc</p>
+                            <hr>
+                        </div>
+                    </div>
+
+                    <h2 class="report-title">
+                        BẢNG TỔNG HỢP GIỜ LAO ĐỘNG KHÁC<br>
+                        NĂM HỌC ${year}
+                    </h2>
+
+                    ${lecturersWithHours.length > 0 ? `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">STT</th>
+                                <th style="width: 35%;">Họ và Tên</th>
+                                <th style="width: 20%;">Mã Giảng viên</th>
+                                <th style="width: 20%;">Tổng giờ quy đổi</th>
+                                <th style="width: 20%;">Ký nhận</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${lecturersWithHours.map((item, index) => `
+                                <tr>
+                                    <td class="center">${index + 1}</td>
+                                    <td>${item.lecturer.name}</td>
+                                    <td class="center">${item.lecturer.code}</td>
+                                    <td class="center">${item.totalHours}</td>
+                                    <td></td>
+                                </tr>
+                            `).join('')}
+                            <tr>
+                                <td colspan="3" style="text-align: right; font-weight: bold;">TỔNG CỘNG</td>
+                                <td class="center" style="font-weight: bold;">${grandTotalHours}</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    ` : `<p class="no-data">Không có dữ liệu giờ lao động cho khoa trong năm học này.</p>`}
+
+                    <div class="footer-container">
+                        <div>
+                            <p class="signature">TRƯỞNG KHOA</p>
+                            <p class="signature-note">(Ký và ghi rõ họ tên)</p>
+                        </div>
+                        <div>
+                            <p>Hải Phòng, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</p>
+                            <p class="signature">NGƯỜI LẬP BIỂU</p>
+                            <p class="signature-note">(Ký và ghi rõ họ tên)</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
         // --- Global Functions (for inline onclick) ---
         window.openModal = (modalId) => document.getElementById(modalId).style.display = 'block';
         window.closeModal = (modalId) => {
@@ -1339,7 +1438,7 @@
                 event.target.style.display = "none";
             }
         };
-        
+
         window.switchTab = (tabName) => {
             const predefinedForm = document.getElementById('predefined-task-form');
             const customForm = document.getElementById('custom-task-form');
@@ -1368,11 +1467,11 @@
             const lecturerEntries = state.entries
                 .filter(e => e.lecturerId === lecturerId && (e.academicYear ? e.academicYear === state.selectedYear : getAcademicYear(e.date) === state.selectedYear))
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
-            
+
             document.getElementById('details-title').textContent = `Chi tiết giờ LĐ (${state.selectedYear}) - ${lecturer.name}`;
             const contentDiv = document.getElementById('details-content');
             contentDiv.innerHTML = '';
-            
+
             const detailsControls = document.getElementById('details-controls');
             if (lecturerEntries.length > 0 && state.currentUser.role === 'admin') {
                 detailsControls.style.display = 'flex';
@@ -1389,8 +1488,8 @@
                 lecturerEntries.forEach(entry => {
                     const item = document.createElement('li');
                     item.className = 'py-3 px-2 flex items-center gap-3';
-                    
-                    const controlsHtml = state.currentUser.role === 'admin' ? 
+
+                    const controlsHtml = state.currentUser.role === 'admin' ?
                         `<div class="flex items-center gap-2">
                             <input type="checkbox" data-entry-id="${entry.id}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 entry-checkbox">
                             <button onclick="openEditEntryModal('${entry.id}')" class="text-blue-500 hover:text-blue-700" title="Sửa mục này"><i class="fas fa-edit"></i></button>
@@ -1407,7 +1506,7 @@
                     } else if (entry.startTime) {
                         timeInfo = ` - Bắt đầu lúc ${entry.startTime}`;
                     }
-                    
+
                     let notesInfo = '';
                     if (entry.notes) {
                         notesInfo = `<p class="text-sm text-gray-600 italic mt-1 pl-2 border-l-2 border-gray-300">Ghi chú: ${entry.notes}</p>`;
@@ -1446,7 +1545,7 @@
             document.getElementById('edit-entry-start-time').value = entry.startTime || '';
             document.getElementById('edit-entry-end-time').value = entry.endTime || '';
             document.getElementById('edit-entry-notes').value = entry.notes || '';
-            
+
             const descTextarea = document.getElementById('edit-entry-description');
             if (entry.description.startsWith('Nhiệm vụ khác:')) {
                 descTextarea.readOnly = false;
@@ -1459,7 +1558,7 @@
 
             openModal('edit-entry-modal');
         };
-        
+
         window.editDepartment = (id) => {
             const dep = state.departments.find(d => d.id === id);
             document.getElementById('department-id').value = dep.id;
@@ -1549,7 +1648,7 @@
         // --- Firebase Initialization and Auth State ---
         let dataListenersAttached = false;
         function setupOnSnapshotListeners() {
-            if (dataListenersAttached) return; 
+            if (dataListenersAttached) return;
             dataListenersAttached = true;
 
             const snapshotErrorHandler = (collectionName) => (error) => {
@@ -1561,7 +1660,7 @@
                 state.departments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
             }, snapshotErrorHandler('Khoa'));
-            
+
             onSnapshot(lecturersCol, (snapshot) => {
                 state.lecturers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
@@ -1572,7 +1671,7 @@
                 if (document.getElementById('details-modal').style.display === 'block' && state.currentLecturerIdForDetails) {
                     showDetails(state.currentLecturerIdForDetails);
                 }
-                renderLecturerTable(); 
+                renderLecturerTable();
             }, snapshotErrorHandler('Giờ lao động'));
 
             onSnapshot(tasksCol, (snapshot) => {
@@ -1616,7 +1715,7 @@
 
                 const appId = firebaseConfig.projectId || 'hpu-workload-tracker-app';
                 const basePath = `artifacts/${appId}/public/data`;
-                
+
                 usersCol = collection(db, `${basePath}/users`);
                 departmentsCol = collection(db, `${basePath}/departments`);
                 lecturersCol = collection(db, `${basePath}/lecturers`);
@@ -1644,7 +1743,7 @@
 
                         state.currentUser = { uid: user.uid, ...userDoc.data() };
                         document.getElementById('user-email').textContent = state.currentUser.email;
-                        
+
                         loginPage.classList.add('hidden');
                         appContent.classList.remove('hidden');
 
@@ -1656,7 +1755,7 @@
                         state.currentUser = null;
                         loginPage.classList.remove('hidden');
                         appContent.classList.add('hidden');
-                        dataListenersAttached = false; 
+                        dataListenersAttached = false;
                         clearInactivityListeners();
                     }
                 });
@@ -1714,7 +1813,7 @@
             document.getElementById('logout-btn').addEventListener('click', () => {
                 signOut(auth);
             });
-            
+
             // Change Password
             document.getElementById('change-password-btn').addEventListener('click', () => {
                 openModal('change-password-modal');
@@ -1771,7 +1870,7 @@
                 await renderUsersList();
                 openModal('manage-users-modal');
             });
-            
+
             document.getElementById('users-list-body').addEventListener('click', async (e) => {
                 const target = e.target.closest('button');
                 if (!target) return;
@@ -1836,7 +1935,7 @@
             document.getElementById('manage-tasks-btn').addEventListener('click', () => openModal('manage-tasks-modal'));
             document.getElementById('manage-lecturers-btn').addEventListener('click', () => openModal('manage-lecturers-modal'));
             document.getElementById('manage-departments-btn').addEventListener('click', () => openModal('manage-departments-modal'));
-            
+
             document.getElementById('add-year-btn').addEventListener('click', () => {
                 const input = document.getElementById('new-year-input');
                 const currentYear = new Date().getFullYear();
@@ -1844,8 +1943,14 @@
                 input.placeholder = `${currentYear}-${currentYear + 1}`;
                 openModal('add-year-modal');
             });
-            
+
             // Details Modal Actions
+            document.getElementById('select-all-entries').addEventListener('change', (e) => {
+                document.querySelectorAll('.entry-checkbox').forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+            });
+
             document.getElementById('delete-selected-entries-btn').addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
                 const selectedIds = Array.from(document.querySelectorAll('.entry-checkbox:checked'))
@@ -1997,7 +2102,7 @@
                     endTime: document.getElementById('edit-entry-end-time').value || null,
                     notes: document.getElementById('edit-entry-notes').value.trim(),
                 };
-                
+
                 updatedData.academicYear = getAcademicYear(updatedData.date);
 
                 if (isNaN(updatedData.hours) || !updatedData.date) {
@@ -2020,15 +2125,15 @@
 
             // Common search logic for bulk tools
             function findEntriesForBulkAction(depId, year, descriptionText, date) {
-                 if (!depId && !year && !descriptionText && !date) { 
-                    showAlert('Vui lòng nhập ít nhất một tiêu chí tìm kiếm.'); 
+                 if (!depId && !year && !descriptionText && !date) {
+                    showAlert('Vui lòng nhập ít nhất một tiêu chí tìm kiếm.');
                     return [];
                 }
                 let lecturerIdsInDep = [];
                 if (depId && depId !== 'all') {
                     lecturerIdsInDep = state.lecturers.filter(l => l.departmentId === depId).map(l => l.id);
-                    if (lecturerIdsInDep.length === 0) { 
-                        showAlert('Khoa được chọn không có giảng viên nào.'); 
+                    if (lecturerIdsInDep.length === 0) {
+                        showAlert('Khoa được chọn không có giảng viên nào.');
                         return [];
                     }
                 }
@@ -2066,21 +2171,21 @@
             document.getElementById('find-entries-to-delete-btn').addEventListener('click', (e) => {
                 const btn = e.currentTarget;
                 setButtonLoading(btn, true);
-                
+
                 setTimeout(() => {
                     try {
                         const depId = document.getElementById('bulk-delete-department').value;
                         const year = document.getElementById('bulk-delete-year').value;
                         const descriptionText = document.getElementById('bulk-delete-description').value.trim().toLowerCase();
                         const date = document.getElementById('bulk-delete-date').value;
-                        
+
                         const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
                         state.foundEntriesToDelete = filteredEntries;
 
                         const resultsContainer = document.getElementById('bulk-delete-results-container');
                         const summaryDiv = document.getElementById('bulk-delete-results-summary');
                         const listDiv = document.getElementById('bulk-delete-results-list');
-                        
+
                         summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp.`;
                         renderResultsList(listDiv, filteredEntries);
 
@@ -2115,7 +2220,7 @@
                     }
                 });
             });
-            
+
             // Bulk Edit Tool Logic
             document.getElementById('bulk-edit-tool-btn').addEventListener('click', () => {
                 const depSelect = document.getElementById('bulk-edit-department');
@@ -2143,14 +2248,14 @@
                         const year = document.getElementById('bulk-edit-year').value;
                         const descriptionText = document.getElementById('bulk-edit-description').value.trim().toLowerCase();
                         const date = document.getElementById('bulk-edit-date').value;
-                        
+
                         const filteredEntries = findEntriesForBulkAction(depId, year, descriptionText, date);
                         state.foundEntriesToEdit = filteredEntries;
 
                         const resultsContainer = document.getElementById('bulk-edit-results-container');
                         const summaryDiv = document.getElementById('bulk-edit-results-summary');
                         const listDiv = document.getElementById('bulk-edit-results-list');
-                        
+
                         summaryDiv.textContent = `Tìm thấy ${filteredEntries.length} mục phù hợp. Vui lòng nhập các thay đổi bên dưới.`;
                         renderResultsList(listDiv, filteredEntries);
 
@@ -2170,7 +2275,7 @@
             document.getElementById('confirm-bulk-edit-btn').addEventListener('click', (e) => {
                 const btn = e.currentTarget;
                 if (state.foundEntriesToEdit.length === 0) { showAlert('Không có mục nào để sửa.'); return; }
-                
+
                 const newDate = document.getElementById('bulk-edit-new-date').value;
                 const newEndDate = document.getElementById('bulk-edit-new-end-date').value;
                 const newNotes = document.getElementById('bulk-edit-new-notes').value;
@@ -2210,20 +2315,21 @@
                 const depSelect = document.getElementById('stats-department-select');
                 depSelect.innerHTML = '<option value="">-- Chọn Khoa --</option>';
                 state.departments.forEach(dep => { depSelect.innerHTML += `<option value="${dep.id}">${dep.name}</option>`; });
-                
+
                 const yearSelect = document.getElementById('stats-year-select');
                 yearSelect.innerHTML = '<option value="">-- Chọn Năm học --</option>';
                 getYearsForSelect().forEach(year => { yearSelect.innerHTML += `<option value="${year}">${year}</option>`; });
-                
+
                 document.getElementById('stats-lecturer-select').innerHTML = '<option value="">-- Chọn Giảng viên --</option>';
                 document.getElementById('statistics-results-container').classList.add('hidden');
+                document.getElementById('export-report-btn').classList.add('hidden');
                 openModal('statistics-modal');
             });
 
             document.getElementById('stats-department-select').addEventListener('change', (e) => {
                 const depId = e.target.value;
                 const lecturerSelect = document.getElementById('stats-lecturer-select');
-                lecturerSelect.innerHTML = '<option value="">-- Chọn Giảng viên --</option>';
+                lecturerSelect.innerHTML = '<option value="">-- Chọn Giảng viên (tùy chọn) --</option>';
                 if (depId) {
                     state.lecturers
                         .filter(l => l.departmentId === depId)
@@ -2231,6 +2337,17 @@
                             lecturerSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
                         });
                 }
+                document.getElementById('statistics-results-container').classList.add('hidden');
+                document.getElementById('export-report-btn').classList.add('hidden');
+            });
+
+            document.getElementById('stats-year-select').addEventListener('change', () => {
+                 document.getElementById('statistics-results-container').classList.add('hidden');
+                 document.getElementById('export-report-btn').classList.add('hidden');
+            });
+             document.getElementById('stats-lecturer-select').addEventListener('change', () => {
+                 document.getElementById('statistics-results-container').classList.add('hidden');
+                 document.getElementById('export-report-btn').classList.add('hidden');
             });
 
             document.getElementById('view-statistics-btn').addEventListener('click', (e) => {
@@ -2256,11 +2373,13 @@
                         const resultsContainer = document.getElementById('statistics-results-container');
                         const resultsTable = document.getElementById('statistics-results-table');
                         const resultsTitle = document.getElementById('statistics-results-title');
+                        const exportBtn = document.getElementById('export-report-btn');
 
                         resultsTitle.textContent = `Kết quả thống kê cho ${state.statsSelectedLecturer.name} - Năm học ${year}`;
-                        
+
                         if (state.statsEntries.length === 0) {
                             resultsTable.innerHTML = '<p class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu.</p>';
+                            exportBtn.classList.add('hidden');
                         } else {
                             const totalHours = state.statsEntries.reduce((sum, e) => sum + e.hours, 0);
                             resultsTable.innerHTML = `
@@ -2289,6 +2408,7 @@
                                     </tbody>
                                 </table>
                             `;
+                            exportBtn.classList.remove('hidden');
                         }
                         resultsContainer.classList.remove('hidden');
                     } catch (error) {
@@ -2312,7 +2432,50 @@
                         showAlert('Không thể mở tab mới. Vui lòng kiểm tra xem trình duyệt của bạn có đang chặn pop-up không.');
                     }
                 } catch (error) {
-                    console.error("Lỗi khi xuất báo cáo:", error);
+                    console.error("Lỗi khi xuất báo cáo giảng viên:", error);
+                    showAlert(`Không thể xuất báo cáo: ${error.message}`);
+                } finally {
+                    setButtonLoading(btn, false);
+                }
+            });
+
+            document.getElementById('export-department-report-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                setButtonLoading(btn, true);
+                try {
+                    const depId = document.getElementById('stats-department-select').value;
+                    const year = document.getElementById('stats-year-select').value;
+
+                    if (!depId) {
+                        showAlert('Vui lòng chọn một khoa để xuất báo cáo.');
+                        return;
+                    }
+                    if (!year) {
+                        showAlert('Vui lòng chọn năm học để xuất báo cáo.');
+                        return;
+                    }
+
+                    const department = state.departments.find(d => d.id === depId);
+                    const lecturersInDep = state.lecturers.filter(l => l.departmentId === depId);
+
+                    const lecturersWithHours = lecturersInDep.map(lecturer => {
+                        const totalHours = state.entries
+                            .filter(entry => entry.lecturerId === lecturer.id && (entry.academicYear ? entry.academicYear === year : getAcademicYear(entry.date) === year))
+                            .reduce((sum, entry) => sum + entry.hours, 0);
+                        return { lecturer, totalHours };
+                    });
+
+                    const reportHtml = generateDepartmentReportHtml(department, lecturersWithHours, year);
+                    const newWindow = window.open('', '_blank');
+                    if (newWindow) {
+                        newWindow.document.write(reportHtml);
+                        newWindow.document.close();
+                    } else {
+                        showAlert('Không thể mở tab mới. Vui lòng kiểm tra xem trình duyệt của bạn có đang chặn pop-up không.');
+                    }
+
+                } catch (error) {
+                    console.error("Lỗi khi xuất báo cáo khoa:", error);
                     showAlert(`Không thể xuất báo cáo: ${error.message}`);
                 } finally {
                     setButtonLoading(btn, false);
