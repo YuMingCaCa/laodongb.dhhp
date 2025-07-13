@@ -991,22 +991,36 @@
             const tableBody = document.getElementById('lecturers-table-body');
             const departmentTitle = document.getElementById('department-title');
             tableBody.innerHTML = '';
+
+            // Filter lecturers based on the selected department
             let filteredLecturers = state.lecturers;
             if (state.selectedDepartmentId && state.selectedDepartmentId !== 'all') {
                 filteredLecturers = state.lecturers.filter(l => l.departmentId === state.selectedDepartmentId);
                 const dep = state.departments.find(d => d.id === state.selectedDepartmentId);
                 departmentTitle.textContent = `Khoa ${dep ? dep.name : ''}`;
             } else {
-                 departmentTitle.textContent = 'Toàn trường';
+                departmentTitle.textContent = 'Toàn trường';
             }
-            if(filteredLecturers.length === 0) {
+
+            if (filteredLecturers.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-gray-500">Chưa có giảng viên nào trong khoa này.</td></tr>`;
                 return;
             }
-            filteredLecturers.forEach((lecturer, index) => {
+
+            // Create an array with lecturers and their total hours
+            const lecturersWithHours = filteredLecturers.map(lecturer => {
                 const totalHours = state.entries
                     .filter(e => e.lecturerId === lecturer.id && (e.academicYear ? e.academicYear === state.selectedYear : getAcademicYear(e.date) === state.selectedYear))
                     .reduce((sum, e) => sum + e.hours, 0);
+                return { lecturer, totalHours };
+            });
+
+            // Sort the array by totalHours in descending order
+            lecturersWithHours.sort((a, b) => b.totalHours - a.totalHours);
+
+            // Render the sorted list
+            lecturersWithHours.forEach((item, index) => {
+                const { lecturer, totalHours } = item;
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">${index + 1}</td>
@@ -1365,6 +1379,9 @@
                     .reduce((sum, entry) => sum + entry.hours, 0);
                 return { lecturer, totalHours };
             });
+            
+            // Sắp xếp danh sách giảng viên theo tổng số giờ giảm dần
+            lecturersWithHours.sort((a, b) => b.totalHours - a.totalHours);
 
             const grandTotalHours = lecturersWithHours.reduce((sum, item) => sum + item.totalHours, 0);
             const now = new Date();
@@ -2411,7 +2428,7 @@
                         state.statsSelectedYear = year;
                         state.statsEntries = state.entries
                             .filter(e => e.lecturerId === lecturerId && (e.academicYear ? e.academicYear === year : getAcademicYear(e.date) === year))
-                            .sort((a, b) => new Date(a.date) - new Date(b.date));
+                            .sort((a, b) => b.hours - a.hours); // Sắp xếp theo giờ giảm dần
 
                         const resultsContainer = document.getElementById('statistics-results-container');
                         const resultsTable = document.getElementById('statistics-results-table');
