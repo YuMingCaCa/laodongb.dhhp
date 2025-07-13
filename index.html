@@ -276,7 +276,7 @@
                         <i class="fas fa-search mr-2"></i>Xem thống kê (GV)
                     </button>
                     <button id="export-department-report-btn" class="flex-1 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                        <i class="fas fa-file-invoice mr-2"></i>Xuất báo cáo (Khoa)
+                        <i class="fas fa-file-pdf mr-2"></i>Xuất Báo cáo (Khoa)
                     </button>
                 </div>
             </div>
@@ -285,7 +285,7 @@
                 <div id="statistics-results-table" class="max-h-80 overflow-y-auto border rounded-md"></div>
                 <div class="mt-4 flex justify-end">
                     <button id="export-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg hidden">
-                        <i class="fas fa-file-export mr-2"></i>Xuất Báo cáo Giảng viên
+                        <i class="fas fa-file-pdf mr-2"></i>Xuất Báo cáo (GV)
                     </button>
                 </div>
             </div>
@@ -1230,23 +1230,34 @@
             }
         }
 
-        function generateReportHtml() {
+        // --- REPORT GENERATION FUNCTIONS ---
+
+        function generateLecturerReportHtml() {
             const lecturer = state.statsSelectedLecturer;
             const entries = state.statsEntries;
             const year = state.statsSelectedYear;
 
             if (!lecturer || !entries || !year) {
-                throw new Error("Không có đủ thông tin để tạo báo cáo. Vui lòng nhấn 'Xem thống kê' trước khi in.");
+                throw new Error("Không có đủ thông tin để tạo báo cáo. Vui lòng nhấn 'Xem thống kê' trước.");
             }
 
             const department = state.departments.find(d => d.id === lecturer.departmentId);
-
             if (!department) {
                 throw new Error(`Không thể tìm thấy khoa cho giảng viên ${lecturer.name}.`);
             }
 
             const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
             const now = new Date();
+
+            const entriesHtml = entries.map((entry, index) => `
+                <tr>
+                    <td style="text-align: center;">${index + 1}</td>
+                    <td>${entry.description}</td>
+                    <td style="text-align: center;">${formatDate(entry.date)}</td>
+                    <td style="text-align: center;">${entry.hours}</td>
+                    <td>${entry.notes || ''}</td>
+                </tr>
+            `).join('');
 
             return `
                 <!DOCTYPE html>
@@ -1255,9 +1266,10 @@
                     <meta charset="UTF-8">
                     <title>Báo cáo giờ lao động - ${lecturer.name} - ${year}</title>
                     <style>
-                        body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0 auto; max-width: 800px; padding: 20px; }
-                        table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 13pt; }
-                        th, td { border: 1px solid black; padding: 8px; }
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
+                        .page { background: white; padding: 2.5cm; width: 21cm; min-height: 29.7cm; box-shadow: 0 0 0.5cm rgba(0,0,0,0.5); }
+                        table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 13pt; margin-top: 20px; }
+                        th, td { border: 1px solid black; padding: 8px; vertical-align: top; }
                         th { font-weight: bold; text-align: center; }
                         .header-container { display: flex; justify-content: space-between; text-align: center; }
                         .header-container p { margin: 0; }
@@ -1265,65 +1277,71 @@
                         .report-title { text-align: center; font-weight: bold; font-size: 16pt; margin-top: 40px; margin-bottom: 20px; }
                         .info-p { font-size: 14pt; margin-bottom: 15px; }
                         .info-p span { font-weight: bold; }
-                        .footer-container { display: flex; justify-content: flex-end; margin-top: 30px; }
-                        .footer-container div { text-align: center; }
+                        .footer-container { display: flex; justify-content: flex-end; margin-top: 50px; }
+                        .footer-container div { text-align: center; width: 50%; }
+                        .print-btn-container { text-align: center; margin-bottom: 20px; }
+                        @media print {
+                            body { background-color: white; padding: 0; }
+                            .print-btn-container { display: none; }
+                            .page { box-shadow: none; margin: 0; padding: 0; }
+                        }
                     </style>
                 </head>
                 <body>
-                    <div class="header-container">
-                        <div>
-                            <p style="text-transform: uppercase;">TRƯỜNG ĐẠI HỌC HẢI PHÒNG</p>
-                            <p style="text-transform: uppercase; font-weight: bold;">${department.name}</p>
-                            <hr>
+                    <div class="page">
+                         <div class="print-btn-container">
+                            <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-print"></i> In ra PDF / Lưu file
+                            </button>
                         </div>
-                        <div>
-                            <p style="font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
-                            <p style="font-weight: bold;">Độc lập - Tự do - Hạnh phúc</p>
-                            <hr>
+                        <div class="header-container">
+                            <div>
+                                <p style="text-transform: uppercase;">TRƯỜNG ĐẠI HỌC HẢI PHÒNG</p>
+                                <p style="text-transform: uppercase; font-weight: bold;">${department.name}</p>
+                                <hr>
+                            </div>
+                            <div>
+                                <p style="font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                                <p style="font-weight: bold;">Độc lập - Tự do - Hạnh phúc</p>
+                                <hr>
+                            </div>
                         </div>
-                    </div>
 
-                    <h2 class="report-title">
-                        BẢNG TỔNG HỢP GIỜ LAO ĐỘNG KHÁC<br>
-                        NĂM HỌC ${year}
-                    </h2>
+                        <h2 class="report-title">
+                            BẢNG TỔNG HỢP GIỜ LAO ĐỘNG KHÁC<br>
+                            NĂM HỌC ${year}
+                        </h2>
 
-                    <p class="info-p">Họ và tên giảng viên: <span>${lecturer.name}</span></p>
-                    <p class="info-p">Mã giảng viên: <span>${lecturer.code}</span></p>
+                        <p class="info-p">Họ và tên giảng viên: <span>${lecturer.name}</span></p>
+                        <p class="info-p">Mã giảng viên: <span>${lecturer.code}</span></p>
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">STT</th>
-                                <th style="width: 45%;">Nội dung công việc</th>
-                                <th style="width: 20%;">Thời gian thực hiện</th>
-                                <th style="width: 10%;">Số giờ</th>
-                                <th>Ghi chú</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${entries.map((entry, index) => `
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td style="text-align: center;">${index + 1}</td>
-                                    <td>${entry.description}</td>
-                                    <td style="text-align: center;">${formatDate(entry.date)}</td>
-                                    <td style="text-align: center;">${entry.hours}</td>
-                                    <td>${entry.notes || ''}</td>
+                                    <th style="width: 5%;">STT</th>
+                                    <th style="width: 45%;">Nội dung công việc</th>
+                                    <th style="width: 20%;">Thời gian thực hiện</th>
+                                    <th style="width: 10%;">Số giờ</th>
+                                    <th>Ghi chú</th>
                                 </tr>
-                            `).join('')}
-                            <tr>
-                                <td colspan="3" style="text-align: right; font-weight: bold;">Tổng cộng</td>
-                                <td style="text-align: center; font-weight: bold;">${totalHours}</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${entriesHtml}
+                                <tr>
+                                    <td colspan="3" style="text-align: right; font-weight: bold;">Tổng cộng</td>
+                                    <td style="text-align: center; font-weight: bold;">${totalHours}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                    <div class="footer-container">
-                        <div>
-                            <p>Hải Phòng, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</p>
-                            <p style="font-weight: bold; margin-top: 15px;">Người lập biểu</p>
-                            <p style="font-style: italic; margin-top: 5px;">(Ký và ghi rõ họ tên)</p>
+                        <div class="footer-container">
+                            <div>
+                                <p>Hải Phòng, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</p>
+                                <p style="font-weight: bold; margin-top: 15px;">Người lập biểu</p>
+                                <p style="font-style: italic; margin-top: 5px; margin-bottom: 80px;">(Ký và ghi rõ họ tên)</p>
+                                <p style="font-weight: bold;">${lecturer.name}</p>
+                            </div>
                         </div>
                     </div>
                 </body>
@@ -1331,13 +1349,42 @@
             `;
         }
 
-        function generateDepartmentReportHtml(department, lecturersWithHours, year) {
-            if (!department || !lecturersWithHours || !year) {
-                throw new Error("Thông tin không đầy đủ để tạo báo cáo khoa.");
-            }
+        function generateDepartmentReportHtml() {
+            const depId = document.getElementById('stats-department-select').value;
+            const year = document.getElementById('stats-year-select').value;
+
+            if (!depId) { throw new Error('Vui lòng chọn một khoa để xuất báo cáo.'); }
+            if (!year) { throw new Error('Vui lòng chọn năm học để xuất báo cáo.'); }
+
+            const department = state.departments.find(d => d.id === depId);
+            const lecturersInDep = state.lecturers.filter(l => l.departmentId === depId);
+
+            const lecturersWithHours = lecturersInDep.map(lecturer => {
+                const totalHours = state.entries
+                    .filter(entry => entry.lecturerId === lecturer.id && (entry.academicYear ? entry.academicYear === year : getAcademicYear(entry.date) === year))
+                    .reduce((sum, entry) => sum + entry.hours, 0);
+                return { lecturer, totalHours };
+            });
 
             const grandTotalHours = lecturersWithHours.reduce((sum, item) => sum + item.totalHours, 0);
             const now = new Date();
+
+            const tableBodyHtml = lecturersWithHours.length > 0 ?
+                lecturersWithHours.map((item, index) => `
+                    <tr>
+                        <td style="text-align: center;">${index + 1}</td>
+                        <td>${item.lecturer.name}</td>
+                        <td style="text-align: center;">${item.lecturer.code}</td>
+                        <td style="text-align: center;">${item.totalHours}</td>
+                        <td></td>
+                    </tr>
+                `).join('') +
+                `<tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">TỔNG CỘNG</td>
+                    <td style="text-align: center; font-weight: bold;">${grandTotalHours}</td>
+                    <td></td>
+                </tr>`
+                : '<tr><td colspan="5" style="text-align: center; padding: 20px; font-style: italic;">Không có dữ liệu giờ lao động cho khoa trong năm học này.</td></tr>';
 
             return `
                 <!DOCTYPE html>
@@ -1346,86 +1393,82 @@
                     <meta charset="UTF-8">
                     <title>Báo cáo tổng hợp - ${department.name} - ${year}</title>
                     <style>
-                        body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0 auto; max-width: 800px; padding: 20px; }
-                        table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 13pt; }
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
+                        .page { background: white; padding: 2.5cm; width: 21cm; min-height: 29.7cm; box-shadow: 0 0 0.5cm rgba(0,0,0,0.5); }
+                        table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 13pt; margin-top: 20px; }
                         th, td { border: 1px solid black; padding: 8px; text-align: left; vertical-align: top;}
                         th { font-weight: bold; text-align: center; }
-                        td.center { text-align: center; }
                         .header-container { display: flex; justify-content: space-between; text-align: center; }
                         .header-container p { margin: 0; }
                         .header-container hr { width: 50%; margin: 4px auto; border-top: 1px solid black; }
                         .report-title { text-align: center; font-weight: bold; font-size: 16pt; margin-top: 40px; margin-bottom: 20px; }
-                        .footer-container { display: flex; justify-content: space-between; margin-top: 40px; }
+                        .footer-container { display: flex; justify-content: space-between; margin-top: 50px; }
                         .footer-container div { text-align: center; flex-basis: 50%; }
-                        .signature { font-weight: bold; margin-top: 15px; }
-                        .signature-note { font-style: italic; margin-top: 5px; }
-                        .no-data { text-align: center; font-style: italic; color: #555; padding: 20px; }
+                        .print-btn-container { text-align: center; margin-bottom: 20px; }
+                        @media print {
+                            body { background-color: white; padding: 0; }
+                            .print-btn-container { display: none; }
+                            .page { box-shadow: none; margin: 0; padding: 0; }
+                        }
                     </style>
                 </head>
                 <body>
-                    <div class="header-container">
-                        <div>
-                            <p style="text-transform: uppercase;">TRƯỜNG ĐẠI HỌC HẢI PHÒNG</p>
-                            <p style="text-transform: uppercase; font-weight: bold;">${department.name}</p>
-                            <hr>
+                    <div class="page">
+                        <div class="print-btn-container">
+                            <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-print"></i> In ra PDF / Lưu file
+                            </button>
                         </div>
-                        <div>
-                            <p style="font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
-                            <p style="font-weight: bold;">Độc lập - Tự do - Hạnh phúc</p>
-                            <hr>
+                        <div class="header-container">
+                            <div>
+                                <p style="text-transform: uppercase;">TRƯỜNG ĐẠI HỌC HẢI PHÒNG</p>
+                                <p style="text-transform: uppercase; font-weight: bold;">${department.name}</p>
+                                <hr>
+                            </div>
+                            <div>
+                                <p style="font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                                <p style="font-weight: bold;">Độc lập - Tự do - Hạnh phúc</p>
+                                <hr>
+                            </div>
                         </div>
-                    </div>
 
-                    <h2 class="report-title">
-                        BẢNG TỔNG HỢP GIỜ LAO ĐỘNG KHÁC<br>
-                        NĂM HỌC ${year}
-                    </h2>
+                        <h2 class="report-title">
+                            BẢNG TỔNG HỢP GIỜ LAO ĐỘNG KHÁC<br>
+                            NĂM HỌC ${year}
+                        </h2>
 
-                    ${lecturersWithHours.length > 0 ? `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">STT</th>
-                                <th style="width: 35%;">Họ và Tên</th>
-                                <th style="width: 20%;">Mã Giảng viên</th>
-                                <th style="width: 20%;">Tổng giờ quy đổi</th>
-                                <th style="width: 20%;">Ký nhận</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${lecturersWithHours.map((item, index) => `
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td class="center">${index + 1}</td>
-                                    <td>${item.lecturer.name}</td>
-                                    <td class="center">${item.lecturer.code}</td>
-                                    <td class="center">${item.totalHours}</td>
-                                    <td></td>
+                                    <th style="width: 5%;">STT</th>
+                                    <th style="width: 35%;">Họ và Tên</th>
+                                    <th style="width: 20%;">Mã Giảng viên</th>
+                                    <th style="width: 20%;">Tổng giờ quy đổi</th>
+                                    <th style="width: 20%;">Ký nhận</th>
                                 </tr>
-                            `).join('')}
-                            <tr>
-                                <td colspan="3" style="text-align: right; font-weight: bold;">TỔNG CỘNG</td>
-                                <td class="center" style="font-weight: bold;">${grandTotalHours}</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    ` : `<p class="no-data">Không có dữ liệu giờ lao động cho khoa trong năm học này.</p>`}
+                            </thead>
+                            <tbody>
+                                ${tableBodyHtml}
+                            </tbody>
+                        </table>
 
-                    <div class="footer-container">
-                        <div>
-                            <p class="signature">TRƯỞNG KHOA</p>
-                            <p class="signature-note">(Ký và ghi rõ họ tên)</p>
-                        </div>
-                        <div>
-                            <p>Hải Phòng, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</p>
-                            <p class="signature">NGƯỜI LẬP BIỂU</p>
-                            <p class="signature-note">(Ký và ghi rõ họ tên)</p>
+                        <div class="footer-container">
+                            <div>
+                                <p style="font-weight: bold;">TRƯỞNG KHOA</p>
+                                <p style="font-style: italic; margin-top: 5px;">(Ký và ghi rõ họ tên)</p>
+                            </div>
+                            <div>
+                                <p>Hải Phòng, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</p>
+                                <p style="font-weight: bold; margin-top: 15px;">NGƯỜI LẬP BIỂU</p>
+                                <p style="font-style: italic; margin-top: 5px;">(Ký và ghi rõ họ tên)</p>
+                            </div>
                         </div>
                     </div>
                 </body>
                 </html>
             `;
         }
+
 
         // --- Global Functions (for inline onclick) ---
         window.openModal = (modalId) => document.getElementById(modalId).style.display = 'block';
@@ -2423,14 +2466,10 @@
                 const btn = e.currentTarget;
                 setButtonLoading(btn, true);
                 try {
-                    const reportHtml = generateReportHtml();
+                    const reportHtml = generateLecturerReportHtml();
                     const newWindow = window.open('', '_blank');
-                    if (newWindow) {
-                        newWindow.document.write(reportHtml);
-                        newWindow.document.close();
-                    } else {
-                        showAlert('Không thể mở tab mới. Vui lòng kiểm tra xem trình duyệt của bạn có đang chặn pop-up không.');
-                    }
+                    newWindow.document.write(reportHtml);
+                    newWindow.document.close();
                 } catch (error) {
                     console.error("Lỗi khi xuất báo cáo giảng viên:", error);
                     showAlert(`Không thể xuất báo cáo: ${error.message}`);
@@ -2443,37 +2482,10 @@
                 const btn = e.currentTarget;
                 setButtonLoading(btn, true);
                 try {
-                    const depId = document.getElementById('stats-department-select').value;
-                    const year = document.getElementById('stats-year-select').value;
-
-                    if (!depId) {
-                        showAlert('Vui lòng chọn một khoa để xuất báo cáo.');
-                        return;
-                    }
-                    if (!year) {
-                        showAlert('Vui lòng chọn năm học để xuất báo cáo.');
-                        return;
-                    }
-
-                    const department = state.departments.find(d => d.id === depId);
-                    const lecturersInDep = state.lecturers.filter(l => l.departmentId === depId);
-
-                    const lecturersWithHours = lecturersInDep.map(lecturer => {
-                        const totalHours = state.entries
-                            .filter(entry => entry.lecturerId === lecturer.id && (entry.academicYear ? entry.academicYear === year : getAcademicYear(entry.date) === year))
-                            .reduce((sum, entry) => sum + entry.hours, 0);
-                        return { lecturer, totalHours };
-                    });
-
-                    const reportHtml = generateDepartmentReportHtml(department, lecturersWithHours, year);
+                    const reportHtml = generateDepartmentReportHtml();
                     const newWindow = window.open('', '_blank');
-                    if (newWindow) {
-                        newWindow.document.write(reportHtml);
-                        newWindow.document.close();
-                    } else {
-                        showAlert('Không thể mở tab mới. Vui lòng kiểm tra xem trình duyệt của bạn có đang chặn pop-up không.');
-                    }
-
+                    newWindow.document.write(reportHtml);
+                    newWindow.document.close();
                 } catch (error) {
                     console.error("Lỗi khi xuất báo cáo khoa:", error);
                     showAlert(`Không thể xuất báo cáo: ${error.message}`);
